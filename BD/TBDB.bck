@@ -1,0 +1,1950 @@
+--
+-- PostgreSQL database dump
+--
+
+-- Dumped from database version 9.1.15
+-- Dumped by pg_dump version 9.1.15
+-- Started on 2015-03-01 22:51:23 BRT
+
+SET statement_timeout = 0;
+SET client_encoding = 'UTF8';
+SET standard_conforming_strings = on;
+SET check_function_bodies = false;
+SET client_min_messages = warning;
+
+--
+-- TOC entry 2182 (class 1262 OID 17108)
+-- Name: portal2; Type: DATABASE; Schema: -; Owner: postgres
+--
+
+CREATE DATABASE portal2 WITH TEMPLATE = template0 ENCODING = 'UTF8' LC_COLLATE = 'en_US.UTF-8' LC_CTYPE = 'en_US.UTF-8';
+
+
+ALTER DATABASE portal2 OWNER TO postgres;
+
+\connect portal2
+
+SET statement_timeout = 0;
+SET client_encoding = 'UTF8';
+SET standard_conforming_strings = on;
+SET check_function_bodies = false;
+SET client_min_messages = warning;
+
+--
+-- TOC entry 201 (class 3079 OID 11680)
+-- Name: plpgsql; Type: EXTENSION; Schema: -; Owner: 
+--
+
+CREATE EXTENSION IF NOT EXISTS plpgsql WITH SCHEMA pg_catalog;
+
+
+--
+-- TOC entry 2185 (class 0 OID 0)
+-- Dependencies: 201
+-- Name: EXTENSION plpgsql; Type: COMMENT; Schema: -; Owner: 
+--
+
+COMMENT ON EXTENSION plpgsql IS 'PL/pgSQL procedural language';
+
+
+SET search_path = public, pg_catalog;
+
+--
+-- TOC entry 219 (class 1255 OID 25266)
+-- Dependencies: 5 629
+-- Name: bytea_import(text); Type: FUNCTION; Schema: public; Owner: postgres
+--
+
+CREATE FUNCTION bytea_import(p_path text, OUT p_result bytea) RETURNS bytea
+    LANGUAGE plpgsql
+    AS $$
+declare
+  l_oid oid;
+  r record;
+begin
+  p_result := '';
+  select lo_import(p_path) into l_oid;
+  for r in ( select data 
+             from pg_largeobject 
+             where loid = l_oid 
+             order by pageno ) loop
+    p_result = p_result || r.data;
+  end loop;
+  perform lo_unlink(l_oid);
+end;$$;
+
+
+ALTER FUNCTION public.bytea_import(p_path text, OUT p_result bytea) OWNER TO postgres;
+
+--
+-- TOC entry 220 (class 1255 OID 20268)
+-- Dependencies: 5 629
+-- Name: chkagenda(); Type: FUNCTION; Schema: public; Owner: postgres
+--
+
+CREATE FUNCTION chkagenda() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$declare
+x int;
+begin
+x = (select count(*) from agenda where 
+  (NEW.netid = netid and NEW.idagenda <> idagenda)
+  and
+  ((NEW.startslot >= startslot and NEW.startslot < endslot) or
+  (NEW.endslot > startslot and NEW.endslot <= endslot) or
+  (NEW.startslot < startslot and NEW.endslot > endslot)));
+  if (x > 0) then 
+    RAISE EXCEPTION 'New Agenda overlaps with existing Agenda.';
+  end if;
+  return NEW;
+end;
+
+$$;
+
+
+ALTER FUNCTION public.chkagenda() OWNER TO postgres;
+
+--
+-- TOC entry 215 (class 1255 OID 20269)
+-- Dependencies: 629 5
+-- Name: chkdelagenda(); Type: FUNCTION; Schema: public; Owner: postgres
+--
+
+CREATE FUNCTION chkdelagenda() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$begin
+if (0 < 
+        (select count(*) from test where idagenda = OLD.idagenda)
+) then 
+  RAISE EXCEPTION 'Agenda still in use.';
+  end if;
+  return OLD;
+end;$$;
+
+
+ALTER FUNCTION public.chkdelagenda() OWNER TO postgres;
+
+--
+-- TOC entry 217 (class 1255 OID 20271)
+-- Dependencies: 5 629
+-- Name: chkdelconfig(); Type: FUNCTION; Schema: public; Owner: postgres
+--
+
+CREATE FUNCTION chkdelconfig() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$begin
+if (0 < 
+        (select count(*) from test where configid = OLD.configid)
+) then 
+  RAISE EXCEPTION 'Config still in use.';
+  end if;
+  return OLD;
+end;$$;
+
+
+ALTER FUNCTION public.chkdelconfig() OWNER TO postgres;
+
+--
+-- TOC entry 216 (class 1255 OID 20272)
+-- Dependencies: 629 5
+-- Name: chkdelnetconfig(); Type: FUNCTION; Schema: public; Owner: postgres
+--
+
+CREATE FUNCTION chkdelnetconfig() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$begin
+if (0 < 
+        (select count(*) from config where netconfigid = OLD.netconfigid)
+) then 
+  RAISE EXCEPTION 'NetConfig still in use.';
+  end if;
+  return OLD;
+end;$$;
+
+
+ALTER FUNCTION public.chkdelnetconfig() OWNER TO postgres;
+
+--
+-- TOC entry 218 (class 1255 OID 20273)
+-- Dependencies: 629 5
+-- Name: chkdelscript(); Type: FUNCTION; Schema: public; Owner: postgres
+--
+
+CREATE FUNCTION chkdelscript() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$begin
+if (0 < 
+        (select count(*) from config where scriptid = OLD.scriptid)
+) then 
+  RAISE EXCEPTION 'Script still in use.';
+  end if;
+  return OLD;
+end;$$;
+
+
+ALTER FUNCTION public.chkdelscript() OWNER TO postgres;
+
+--
+-- TOC entry 221 (class 1255 OID 20264)
+-- Dependencies: 629 5
+-- Name: date2slot(timestamp with time zone); Type: FUNCTION; Schema: public; Owner: postgres
+--
+
+CREATE FUNCTION date2slot(refdate timestamp with time zone) RETURNS bigint
+    LANGUAGE plpgsql
+    AS $$declare
+  slot bigint;
+begin
+  slot = date_part('year',refdate) * 100000000;
+  slot = slot + date_part('month',refdate) * 1000000;
+  slot = slot + date_part('day',refdate) * 10000;
+  slot = slot + date_part('hour',refdate) * 100;
+  IF date_part('minute',refdate) < 30 THEN
+    slot = slot + 0;
+  ELSE
+    slot = slot + 30;
+  END IF;
+
+  return slot;
+end;
+$$;
+
+
+ALTER FUNCTION public.date2slot(refdate timestamp with time zone) OWNER TO postgres;
+
+SET default_tablespace = '';
+
+SET default_with_oids = false;
+
+--
+-- TOC entry 174 (class 1259 OID 19975)
+-- Dependencies: 5
+-- Name: slotsviewtype; Type: TABLE; Schema: public; Owner: postgres; Tablespace: 
+--
+
+CREATE TABLE slotsviewtype (
+    slot bigint NOT NULL,
+    enabled boolean,
+    accesslevel integer,
+    used boolean NOT NULL,
+    notgranted boolean NOT NULL,
+    isowner boolean NOT NULL,
+    uid integer
+);
+
+
+ALTER TABLE public.slotsviewtype OWNER TO postgres;
+
+--
+-- TOC entry 222 (class 1255 OID 30537)
+-- Dependencies: 603 629 5
+-- Name: getslots(timestamp with time zone, integer, integer); Type: FUNCTION; Schema: public; Owner: postgres
+--
+
+CREATE FUNCTION getslots(refdate timestamp with time zone, "UserID" integer, "NetID" integer) RETURNS SETOF slotsviewtype
+    LANGUAGE plpgsql
+    AS $$
+declare 
+returnrec slotsviewtype;
+monday timestamp;
+userlevel integer;
+
+begin
+  monday = date_trunc('week', refdate);
+  drop table if exists temptable;
+  CREATE TEMP TABLE temptable () INHERITS (slotsviewtype);
+
+userlevel = (select max(accesslevel) from users where uid = "UserID");
+
+-- Fill up all 2 weeks slots
+insert into temptable (
+select (d+h) as slot, false as enabled, 0 as accessLevel,false as used,true as notGranted,false as isOwner from 
+  (select ((date_part('year',datex) * 100000000) +
+	date_part('month',datex) * 1000000 +
+	date_part('day',datex) * 10000) as d from
+    (select generate_series(monday,monday+'13 day','1 day') as datex) as DT) as p1,
+      (select (X*100+Y) as h from (select generate_series(0,23,1) as X) as A,
+      (select generate_series(0, 30, 30)as Y) as B) as p2
+);
+
+
+-- Update from template
+update temptable
+  set enabled = tp.enabled, accessLevel = tp.accessLevel, notGranted=tp.notGranted from 
+    (select slotx,enabled,accessLevel,false as used, null as userid,false as notGranted,false as isowner
+       from (
+-- from slottemplate 1st week
+          select date2slot(monday+slot2interval(slotOffset)) as slotx, enabled, accessLevel 
+          from SlotsTemplate where netid = "NetID"
+       union
+-- from slottemplate 2nd week
+          select date2slot(monday+'7 day'+slot2interval(slotOffset)) as slotx, enabled,accessLevel
+          from SlotsTemplate where netid = "NetID"
+   ) as temp2 
+  ) as tp
+where slot = tp.slotx;
+
+-- Update from Extra Slots
+update temptable
+  set enabled = es.enabled, accessLevel = es.accessLevel from 
+    (select slot as slotx, enabled, accessLevel from ExtraSlots where netid = "NetID") as es
+    where slot = es.slotx;
+
+-- Update reserved slots as used (from agenda)
+update temptable
+set used=true, uid=B.uid, isowner=(case when "UserID" = B.uid then TRUE else FALSE end)
+from temptable A, Agenda B
+where ( B.netid = "NetID" and
+	temptable.slot = A.slot and
+        A.slot >= B.startSlot and 
+        A.slot < B.endSlot);
+
+-- Update past slots. Leave current slot free.
+update temptable
+  set used=true, isowner=false
+  where slot <= Date2Slot(LOCALTIMESTAMP - interval '30 minutes');
+
+-- Updadte notGrated slots from userlevel
+update temptable
+  set notGranted=true
+  where userlevel < accesslevel;
+
+-- Return data
+  FOR returnrec IN SELECT * FROM temptable order by slot LOOP
+        RETURN NEXT returnrec;
+    END LOOP;
+ 
+  return;
+end;
+$$;
+
+
+ALTER FUNCTION public.getslots(refdate timestamp with time zone, "UserID" integer, "NetID" integer) OWNER TO postgres;
+
+--
+-- TOC entry 213 (class 1255 OID 20267)
+-- Dependencies: 629 5
+-- Name: slot2interval(bigint); Type: FUNCTION; Schema: public; Owner: postgres
+--
+
+CREATE FUNCTION slot2interval(slotnumber bigint) RETURNS interval
+    LANGUAGE plpgsql
+    AS $$declare
+  Minutes interval;
+  xD bigint;
+  xH bigint;
+  xM bigint;
+  xMin bigint;
+begin
+  xM = mod(slotnumber,100);
+  xH = mod((slotnumber/100),100);
+  xD = mod((slotnumber/10000),100);
+  xMin = xM + (xH * 60) + (xD * 24 * 60);
+  Minutes = xMin * '1 minutes'::interval;
+
+  return Minutes;
+end;
+$$;
+
+
+ALTER FUNCTION public.slot2interval(slotnumber bigint) OWNER TO postgres;
+
+--
+-- TOC entry 214 (class 1255 OID 20270)
+-- Dependencies: 629 5
+-- Name: update_modified_column(); Type: FUNCTION; Schema: public; Owner: postgres
+--
+
+CREATE FUNCTION update_modified_column() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+	BEGIN
+	   NEW.modified = now(); 
+	   RETURN NEW;
+	END;
+	$$;
+
+
+ALTER FUNCTION public.update_modified_column() OWNER TO postgres;
+
+--
+-- TOC entry 188 (class 1259 OID 25097)
+-- Dependencies: 1951 1952 5
+-- Name: agenda; Type: TABLE; Schema: public; Owner: postgres; Tablespace: 
+--
+
+CREATE TABLE agenda (
+    idagenda integer NOT NULL,
+    netid integer NOT NULL,
+    startslot bigint,
+    endslot bigint,
+    uid integer NOT NULL,
+    cname character varying,
+    description character varying,
+    created timestamp without time zone DEFAULT now() NOT NULL,
+    modified timestamp without time zone DEFAULT now() NOT NULL
+);
+
+
+ALTER TABLE public.agenda OWNER TO postgres;
+
+--
+-- TOC entry 187 (class 1259 OID 25095)
+-- Dependencies: 5 188
+-- Name: agenda_idagenda_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE agenda_idagenda_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.agenda_idagenda_seq OWNER TO postgres;
+
+--
+-- TOC entry 2186 (class 0 OID 0)
+-- Dependencies: 187
+-- Name: agenda_idagenda_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE agenda_idagenda_seq OWNED BY agenda.idagenda;
+
+
+--
+-- TOC entry 197 (class 1259 OID 33036)
+-- Dependencies: 5
+-- Name: appopers; Type: TABLE; Schema: public; Owner: postgres; Tablespace: 
+--
+
+CREATE TABLE appopers (
+    operid integer NOT NULL,
+    opername character varying NOT NULL
+);
+
+
+ALTER TABLE public.appopers OWNER TO postgres;
+
+--
+-- TOC entry 184 (class 1259 OID 20050)
+-- Dependencies: 1948 1949 5
+-- Name: config; Type: TABLE; Schema: public; Owner: postgres; Tablespace: 
+--
+
+CREATE TABLE config (
+    configid integer NOT NULL,
+    netid integer NOT NULL,
+    netversion integer NOT NULL,
+    uid integer NOT NULL,
+    netconfigid integer NOT NULL,
+    scriptid integer NOT NULL,
+    cname character varying,
+    description character varying,
+    created timestamp without time zone DEFAULT now() NOT NULL,
+    modified timestamp without time zone DEFAULT now() NOT NULL
+);
+
+
+ALTER TABLE public.config OWNER TO postgres;
+
+--
+-- TOC entry 183 (class 1259 OID 20048)
+-- Dependencies: 184 5
+-- Name: configid_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE configid_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.configid_seq OWNER TO postgres;
+
+--
+-- TOC entry 2187 (class 0 OID 0)
+-- Dependencies: 183
+-- Name: configid_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE configid_seq OWNED BY config.configid;
+
+
+--
+-- TOC entry 199 (class 1259 OID 33049)
+-- Dependencies: 5
+-- Name: configparams; Type: TABLE; Schema: public; Owner: postgres; Tablespace: 
+--
+
+CREATE TABLE configparams (
+    paramid integer NOT NULL,
+    paramname character varying NOT NULL
+);
+
+
+ALTER TABLE public.configparams OWNER TO postgres;
+
+--
+-- TOC entry 171 (class 1259 OID 19946)
+-- Dependencies: 1930 1931 5
+-- Name: extraslots; Type: TABLE; Schema: public; Owner: postgres; Tablespace: 
+--
+
+CREATE TABLE extraslots (
+    slot bigint NOT NULL,
+    netid integer NOT NULL,
+    enabled boolean,
+    accesslevel integer,
+    created timestamp without time zone DEFAULT now() NOT NULL,
+    modified timestamp without time zone DEFAULT now() NOT NULL
+);
+
+
+ALTER TABLE public.extraslots OWNER TO postgres;
+
+--
+-- TOC entry 191 (class 1259 OID 25253)
+-- Dependencies: 1955 5
+-- Name: logdata; Type: TABLE; Schema: public; Owner: postgres; Tablespace: 
+--
+
+CREATE TABLE logdata (
+    logseq integer NOT NULL,
+    testid integer NOT NULL,
+    netid integer NOT NULL,
+    netversion integer NOT NULL,
+    logtime timestamp without time zone DEFAULT now() NOT NULL,
+    nodeid integer NOT NULL,
+    logtype character varying,
+    logline character varying NOT NULL,
+    pid integer NOT NULL
+);
+
+
+ALTER TABLE public.logdata OWNER TO postgres;
+
+--
+-- TOC entry 190 (class 1259 OID 25251)
+-- Dependencies: 191 5
+-- Name: logdata_logseq_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE logdata_logseq_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.logdata_logseq_seq OWNER TO postgres;
+
+--
+-- TOC entry 2188 (class 0 OID 0)
+-- Dependencies: 190
+-- Name: logdata_logseq_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE logdata_logseq_seq OWNED BY logdata.logseq;
+
+
+--
+-- TOC entry 179 (class 1259 OID 20014)
+-- Dependencies: 1942 1943 5
+-- Name: netconfig; Type: TABLE; Schema: public; Owner: postgres; Tablespace: 
+--
+
+CREATE TABLE netconfig (
+    netconfigid integer NOT NULL,
+    netid integer NOT NULL,
+    netversion integer NOT NULL,
+    uid integer NOT NULL,
+    cname character varying,
+    description character varying,
+    created timestamp without time zone DEFAULT now() NOT NULL,
+    modified timestamp without time zone DEFAULT now() NOT NULL
+);
+
+
+ALTER TABLE public.netconfig OWNER TO postgres;
+
+--
+-- TOC entry 178 (class 1259 OID 20012)
+-- Dependencies: 179 5
+-- Name: netconfig_netconfigid_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE netconfig_netconfigid_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.netconfig_netconfigid_seq OWNER TO postgres;
+
+--
+-- TOC entry 2189 (class 0 OID 0)
+-- Dependencies: 178
+-- Name: netconfig_netconfigid_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE netconfig_netconfigid_seq OWNED BY netconfig.netconfigid;
+
+
+--
+-- TOC entry 180 (class 1259 OID 20025)
+-- Dependencies: 5
+-- Name: netconfigdefaultfiles; Type: TABLE; Schema: public; Owner: postgres; Tablespace: 
+--
+
+CREATE TABLE netconfigdefaultfiles (
+    netconfigid integer NOT NULL,
+    nodetype integer NOT NULL,
+    fileid integer NOT NULL
+);
+
+
+ALTER TABLE public.netconfigdefaultfiles OWNER TO postgres;
+
+--
+-- TOC entry 186 (class 1259 OID 25007)
+-- Dependencies: 5
+-- Name: netconfignodes; Type: TABLE; Schema: public; Owner: postgres; Tablespace: 
+--
+
+CREATE TABLE netconfignodes (
+    netconfigid integer NOT NULL,
+    nodeid integer NOT NULL,
+    usedefaultfile boolean,
+    fileid integer NOT NULL,
+    logicid integer,
+    selected boolean
+);
+
+
+ALTER TABLE public.netconfignodes OWNER TO postgres;
+
+--
+-- TOC entry 173 (class 1259 OID 19959)
+-- Dependencies: 1933 1934 5
+-- Name: network; Type: TABLE; Schema: public; Owner: postgres; Tablespace: 
+--
+
+CREATE TABLE network (
+    netid integer NOT NULL,
+    netversion integer NOT NULL,
+    nodeid integer NOT NULL,
+    nodetype integer NOT NULL,
+    statusid integer NOT NULL,
+    location character varying,
+    posx integer,
+    posy integer,
+    posz integer,
+    ctlchannel character varying(200) NOT NULL,
+    datachannel character varying(200) NOT NULL,
+    created timestamp without time zone DEFAULT now() NOT NULL,
+    modified timestamp without time zone DEFAULT now() NOT NULL
+);
+
+
+ALTER TABLE public.network OWNER TO postgres;
+
+--
+-- TOC entry 170 (class 1259 OID 19936)
+-- Dependencies: 1928 1929 5
+-- Name: networks; Type: TABLE; Schema: public; Owner: postgres; Tablespace: 
+--
+
+CREATE TABLE networks (
+    netid integer NOT NULL,
+    netversion integer NOT NULL,
+    nname character varying NOT NULL,
+    description character varying NOT NULL,
+    vdescription character varying NOT NULL,
+    modified timestamp without time zone DEFAULT now() NOT NULL,
+    created timestamp without time zone DEFAULT now() NOT NULL
+);
+
+
+ALTER TABLE public.networks OWNER TO postgres;
+
+--
+-- TOC entry 169 (class 1259 OID 19928)
+-- Dependencies: 5
+-- Name: nodestatus; Type: TABLE; Schema: public; Owner: postgres; Tablespace: 
+--
+
+CREATE TABLE nodestatus (
+    statusid integer NOT NULL,
+    code character varying NOT NULL,
+    description character varying NOT NULL
+);
+
+
+ALTER TABLE public.nodestatus OWNER TO postgres;
+
+--
+-- TOC entry 172 (class 1259 OID 19953)
+-- Dependencies: 1932 5
+-- Name: nodestype; Type: TABLE; Schema: public; Owner: postgres; Tablespace: 
+--
+
+CREATE TABLE nodestype (
+    nodetype integer NOT NULL,
+    description character varying(100),
+    created timestamp without time zone DEFAULT now() NOT NULL,
+    short character varying
+);
+
+
+ALTER TABLE public.nodestype OWNER TO postgres;
+
+--
+-- TOC entry 198 (class 1259 OID 33044)
+-- Dependencies: 5
+-- Name: operroles; Type: TABLE; Schema: public; Owner: postgres; Tablespace: 
+--
+
+CREATE TABLE operroles (
+    operid integer NOT NULL,
+    roleid integer NOT NULL
+);
+
+
+ALTER TABLE public.operroles OWNER TO postgres;
+
+--
+-- TOC entry 195 (class 1259 OID 33010)
+-- Dependencies: 5
+-- Name: roles; Type: TABLE; Schema: public; Owner: postgres; Tablespace: 
+--
+
+CREATE TABLE roles (
+    roleid integer NOT NULL,
+    rolename character varying NOT NULL,
+    entry character varying NOT NULL
+);
+
+
+ALTER TABLE public.roles OWNER TO postgres;
+
+--
+-- TOC entry 182 (class 1259 OID 20037)
+-- Dependencies: 1945 1946 5
+-- Name: script; Type: TABLE; Schema: public; Owner: postgres; Tablespace: 
+--
+
+CREATE TABLE script (
+    scriptid integer NOT NULL,
+    netid integer NOT NULL,
+    netversion integer NOT NULL,
+    uid integer NOT NULL,
+    cname character varying,
+    description character varying,
+    created timestamp without time zone DEFAULT now() NOT NULL,
+    modified timestamp without time zone DEFAULT now() NOT NULL
+);
+
+
+ALTER TABLE public.script OWNER TO postgres;
+
+--
+-- TOC entry 181 (class 1259 OID 20035)
+-- Dependencies: 182 5
+-- Name: script_planid_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE script_planid_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.script_planid_seq OWNER TO postgres;
+
+--
+-- TOC entry 2190 (class 0 OID 0)
+-- Dependencies: 181
+-- Name: script_planid_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE script_planid_seq OWNED BY script.scriptid;
+
+
+--
+-- TOC entry 185 (class 1259 OID 20061)
+-- Dependencies: 5
+-- Name: scriptsteps; Type: TABLE; Schema: public; Owner: postgres; Tablespace: 
+--
+
+CREATE TABLE scriptsteps (
+    scriptid integer NOT NULL,
+    step integer NOT NULL,
+    command character varying(1),
+    paramvalue character varying
+);
+
+
+ALTER TABLE public.scriptsteps OWNER TO postgres;
+
+--
+-- TOC entry 189 (class 1259 OID 25182)
+-- Dependencies: 1953 5
+-- Name: slotstemplate; Type: TABLE; Schema: public; Owner: postgres; Tablespace: 
+--
+
+CREATE TABLE slotstemplate (
+    slotoffset bigint NOT NULL,
+    netid integer NOT NULL,
+    enabled boolean,
+    accesslevel integer,
+    created timestamp without time zone DEFAULT now() NOT NULL
+);
+
+
+ALTER TABLE public.slotstemplate OWNER TO postgres;
+
+--
+-- TOC entry 193 (class 1259 OID 25371)
+-- Dependencies: 1957 1958 5
+-- Name: test; Type: TABLE; Schema: public; Owner: postgres; Tablespace: 
+--
+
+CREATE TABLE test (
+    testid integer NOT NULL,
+    netid integer NOT NULL,
+    netversion integer NOT NULL,
+    configid integer NOT NULL,
+    idagenda integer NOT NULL,
+    uid integer NOT NULL,
+    clientip character varying,
+    cname character varying,
+    description character varying,
+    created timestamp without time zone DEFAULT now() NOT NULL,
+    modified timestamp without time zone DEFAULT now() NOT NULL
+);
+
+
+ALTER TABLE public.test OWNER TO postgres;
+
+--
+-- TOC entry 192 (class 1259 OID 25369)
+-- Dependencies: 193 5
+-- Name: test_testid_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE test_testid_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.test_testid_seq OWNER TO postgres;
+
+--
+-- TOC entry 2191 (class 0 OID 0)
+-- Dependencies: 192
+-- Name: test_testid_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE test_testid_seq OWNED BY test.testid;
+
+
+--
+-- TOC entry 200 (class 1259 OID 33061)
+-- Dependencies: 5
+-- Name: userconfig; Type: TABLE; Schema: public; Owner: postgres; Tablespace: 
+--
+
+CREATE TABLE userconfig (
+    uid integer NOT NULL,
+    paramid integer NOT NULL,
+    paramvalue character varying NOT NULL
+);
+
+
+ALTER TABLE public.userconfig OWNER TO postgres;
+
+--
+-- TOC entry 177 (class 1259 OID 20001)
+-- Dependencies: 1940 5
+-- Name: userfiles; Type: TABLE; Schema: public; Owner: postgres; Tablespace: 
+--
+
+CREATE TABLE userfiles (
+    fileid integer NOT NULL,
+    uid integer NOT NULL,
+    nodetype integer NOT NULL,
+    filename character varying,
+    bindata bytea NOT NULL,
+    created timestamp without time zone DEFAULT now() NOT NULL,
+    description character varying
+);
+
+
+ALTER TABLE public.userfiles OWNER TO postgres;
+
+--
+-- TOC entry 176 (class 1259 OID 19999)
+-- Dependencies: 5 177
+-- Name: userfiles_fileid_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE userfiles_fileid_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.userfiles_fileid_seq OWNER TO postgres;
+
+--
+-- TOC entry 2192 (class 0 OID 0)
+-- Dependencies: 176
+-- Name: userfiles_fileid_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE userfiles_fileid_seq OWNED BY userfiles.fileid;
+
+
+--
+-- TOC entry 196 (class 1259 OID 33022)
+-- Dependencies: 5
+-- Name: userroles; Type: TABLE; Schema: public; Owner: postgres; Tablespace: 
+--
+
+CREATE TABLE userroles (
+    uid integer NOT NULL,
+    roleid integer NOT NULL
+);
+
+
+ALTER TABLE public.userroles OWNER TO postgres;
+
+--
+-- TOC entry 175 (class 1259 OID 19980)
+-- Dependencies: 1936 1937 1938 5
+-- Name: users; Type: TABLE; Schema: public; Owner: postgres; Tablespace: 
+--
+
+CREATE TABLE users (
+    uid integer NOT NULL,
+    ulogin character varying NOT NULL,
+    uname character varying NOT NULL,
+    accesslevel integer DEFAULT 0 NOT NULL,
+    created timestamp without time zone DEFAULT now() NOT NULL,
+    modified timestamp without time zone DEFAULT now() NOT NULL,
+    upassword character varying NOT NULL
+);
+
+
+ALTER TABLE public.users OWNER TO postgres;
+
+--
+-- TOC entry 194 (class 1259 OID 33007)
+-- Dependencies: 5 175
+-- Name: users_uid_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE users_uid_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.users_uid_seq OWNER TO postgres;
+
+--
+-- TOC entry 2193 (class 0 OID 0)
+-- Dependencies: 194
+-- Name: users_uid_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE users_uid_seq OWNED BY users.uid;
+
+
+--
+-- TOC entry 1950 (class 2604 OID 25100)
+-- Dependencies: 187 188 188
+-- Name: idagenda; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY agenda ALTER COLUMN idagenda SET DEFAULT nextval('agenda_idagenda_seq'::regclass);
+
+
+--
+-- TOC entry 1947 (class 2604 OID 20053)
+-- Dependencies: 183 184 184
+-- Name: configid; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY config ALTER COLUMN configid SET DEFAULT nextval('configid_seq'::regclass);
+
+
+--
+-- TOC entry 1954 (class 2604 OID 25256)
+-- Dependencies: 191 190 191
+-- Name: logseq; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY logdata ALTER COLUMN logseq SET DEFAULT nextval('logdata_logseq_seq'::regclass);
+
+
+--
+-- TOC entry 1941 (class 2604 OID 20017)
+-- Dependencies: 178 179 179
+-- Name: netconfigid; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY netconfig ALTER COLUMN netconfigid SET DEFAULT nextval('netconfig_netconfigid_seq'::regclass);
+
+
+--
+-- TOC entry 1944 (class 2604 OID 20040)
+-- Dependencies: 181 182 182
+-- Name: scriptid; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY script ALTER COLUMN scriptid SET DEFAULT nextval('script_planid_seq'::regclass);
+
+
+--
+-- TOC entry 1956 (class 2604 OID 25374)
+-- Dependencies: 192 193 193
+-- Name: testid; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY test ALTER COLUMN testid SET DEFAULT nextval('test_testid_seq'::regclass);
+
+
+--
+-- TOC entry 1939 (class 2604 OID 20004)
+-- Dependencies: 176 177 177
+-- Name: fileid; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY userfiles ALTER COLUMN fileid SET DEFAULT nextval('userfiles_fileid_seq'::regclass);
+
+
+--
+-- TOC entry 1935 (class 2604 OID 33009)
+-- Dependencies: 194 175
+-- Name: uid; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY users ALTER COLUMN uid SET DEFAULT nextval('users_uid_seq'::regclass);
+
+
+--
+-- TOC entry 2004 (class 2606 OID 25107)
+-- Dependencies: 188 188 2179
+-- Name: agenda_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres; Tablespace: 
+--
+
+ALTER TABLE ONLY agenda
+    ADD CONSTRAINT agenda_pkey PRIMARY KEY (idagenda);
+
+
+--
+-- TOC entry 2023 (class 2606 OID 33060)
+-- Dependencies: 197 197 2179
+-- Name: appopers_opername_unique; Type: CONSTRAINT; Schema: public; Owner: postgres; Tablespace: 
+--
+
+ALTER TABLE ONLY appopers
+    ADD CONSTRAINT appopers_opername_unique UNIQUE (opername);
+
+
+--
+-- TOC entry 2025 (class 2606 OID 33043)
+-- Dependencies: 197 197 2179
+-- Name: appopers_pk; Type: CONSTRAINT; Schema: public; Owner: postgres; Tablespace: 
+--
+
+ALTER TABLE ONLY appopers
+    ADD CONSTRAINT appopers_pk PRIMARY KEY (operid);
+
+
+--
+-- TOC entry 1995 (class 2606 OID 20060)
+-- Dependencies: 184 184 2179
+-- Name: config_pk; Type: CONSTRAINT; Schema: public; Owner: postgres; Tablespace: 
+--
+
+ALTER TABLE ONLY config
+    ADD CONSTRAINT config_pk PRIMARY KEY (configid);
+
+
+--
+-- TOC entry 2029 (class 2606 OID 33058)
+-- Dependencies: 199 199 2179
+-- Name: configparams_paramname_unique; Type: CONSTRAINT; Schema: public; Owner: postgres; Tablespace: 
+--
+
+ALTER TABLE ONLY configparams
+    ADD CONSTRAINT configparams_paramname_unique UNIQUE (paramname);
+
+
+--
+-- TOC entry 2031 (class 2606 OID 33053)
+-- Dependencies: 199 199 2179
+-- Name: configparams_pk; Type: CONSTRAINT; Schema: public; Owner: postgres; Tablespace: 
+--
+
+ALTER TABLE ONLY configparams
+    ADD CONSTRAINT configparams_pk PRIMARY KEY (paramid);
+
+
+--
+-- TOC entry 1965 (class 2606 OID 19952)
+-- Dependencies: 171 171 2179
+-- Name: extraslots_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres; Tablespace: 
+--
+
+ALTER TABLE ONLY extraslots
+    ADD CONSTRAINT extraslots_pkey PRIMARY KEY (slot);
+
+
+--
+-- TOC entry 2009 (class 2606 OID 25262)
+-- Dependencies: 191 191 2179
+-- Name: logdata_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres; Tablespace: 
+--
+
+ALTER TABLE ONLY logdata
+    ADD CONSTRAINT logdata_pkey PRIMARY KEY (logseq);
+
+
+--
+-- TOC entry 1987 (class 2606 OID 20024)
+-- Dependencies: 179 179 2179
+-- Name: netconfig_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres; Tablespace: 
+--
+
+ALTER TABLE ONLY netconfig
+    ADD CONSTRAINT netconfig_pkey PRIMARY KEY (netconfigid);
+
+
+--
+-- TOC entry 1990 (class 2606 OID 20029)
+-- Dependencies: 180 180 180 2179
+-- Name: netconfigdefaultfiles_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres; Tablespace: 
+--
+
+ALTER TABLE ONLY netconfigdefaultfiles
+    ADD CONSTRAINT netconfigdefaultfiles_pkey PRIMARY KEY (netconfigid, nodetype);
+
+
+--
+-- TOC entry 2002 (class 2606 OID 25011)
+-- Dependencies: 186 186 186 2179
+-- Name: netconfignodes_pk; Type: CONSTRAINT; Schema: public; Owner: postgres; Tablespace: 
+--
+
+ALTER TABLE ONLY netconfignodes
+    ADD CONSTRAINT netconfignodes_pk PRIMARY KEY (netconfigid, nodeid);
+
+
+--
+-- TOC entry 1970 (class 2606 OID 19968)
+-- Dependencies: 173 173 173 173 2179
+-- Name: network_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres; Tablespace: 
+--
+
+ALTER TABLE ONLY network
+    ADD CONSTRAINT network_pkey PRIMARY KEY (netid, netversion, nodeid);
+
+
+--
+-- TOC entry 1963 (class 2606 OID 19945)
+-- Dependencies: 170 170 170 2179
+-- Name: networks_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres; Tablespace: 
+--
+
+ALTER TABLE ONLY networks
+    ADD CONSTRAINT networks_pkey PRIMARY KEY (netid, netversion);
+
+
+--
+-- TOC entry 1960 (class 2606 OID 19935)
+-- Dependencies: 169 169 2179
+-- Name: nodestatus_pk; Type: CONSTRAINT; Schema: public; Owner: postgres; Tablespace: 
+--
+
+ALTER TABLE ONLY nodestatus
+    ADD CONSTRAINT nodestatus_pk PRIMARY KEY (statusid);
+
+
+--
+-- TOC entry 1967 (class 2606 OID 19958)
+-- Dependencies: 172 172 2179
+-- Name: nodestype_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres; Tablespace: 
+--
+
+ALTER TABLE ONLY nodestype
+    ADD CONSTRAINT nodestype_pkey PRIMARY KEY (nodetype);
+
+
+--
+-- TOC entry 2027 (class 2606 OID 33048)
+-- Dependencies: 198 198 198 2179
+-- Name: operroles_pk; Type: CONSTRAINT; Schema: public; Owner: postgres; Tablespace: 
+--
+
+ALTER TABLE ONLY operroles
+    ADD CONSTRAINT operroles_pk PRIMARY KEY (operid, roleid);
+
+
+--
+-- TOC entry 2018 (class 2606 OID 33017)
+-- Dependencies: 195 195 2179
+-- Name: roles_pk; Type: CONSTRAINT; Schema: public; Owner: postgres; Tablespace: 
+--
+
+ALTER TABLE ONLY roles
+    ADD CONSTRAINT roles_pk PRIMARY KEY (roleid);
+
+
+--
+-- TOC entry 1993 (class 2606 OID 20047)
+-- Dependencies: 182 182 2179
+-- Name: script_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres; Tablespace: 
+--
+
+ALTER TABLE ONLY script
+    ADD CONSTRAINT script_pkey PRIMARY KEY (scriptid);
+
+
+--
+-- TOC entry 1999 (class 2606 OID 20068)
+-- Dependencies: 185 185 185 2179
+-- Name: scriptsteps_pk; Type: CONSTRAINT; Schema: public; Owner: postgres; Tablespace: 
+--
+
+ALTER TABLE ONLY scriptsteps
+    ADD CONSTRAINT scriptsteps_pk PRIMARY KEY (scriptid, step);
+
+
+--
+-- TOC entry 1972 (class 2606 OID 19979)
+-- Dependencies: 174 174 2179
+-- Name: slotsviewtype_pk; Type: CONSTRAINT; Schema: public; Owner: postgres; Tablespace: 
+--
+
+ALTER TABLE ONLY slotsviewtype
+    ADD CONSTRAINT slotsviewtype_pk PRIMARY KEY (slot);
+
+
+--
+-- TOC entry 2016 (class 2606 OID 25381)
+-- Dependencies: 193 193 2179
+-- Name: test_pk; Type: CONSTRAINT; Schema: public; Owner: postgres; Tablespace: 
+--
+
+ALTER TABLE ONLY test
+    ADD CONSTRAINT test_pk PRIMARY KEY (testid);
+
+
+--
+-- TOC entry 2035 (class 2606 OID 33069)
+-- Dependencies: 200 200 200 2179
+-- Name: userconfig_pk; Type: CONSTRAINT; Schema: public; Owner: postgres; Tablespace: 
+--
+
+ALTER TABLE ONLY userconfig
+    ADD CONSTRAINT userconfig_pk PRIMARY KEY (uid, paramid);
+
+
+--
+-- TOC entry 1984 (class 2606 OID 20010)
+-- Dependencies: 177 177 2179
+-- Name: userfiles_pk; Type: CONSTRAINT; Schema: public; Owner: postgres; Tablespace: 
+--
+
+ALTER TABLE ONLY userfiles
+    ADD CONSTRAINT userfiles_pk PRIMARY KEY (fileid);
+
+
+--
+-- TOC entry 2021 (class 2606 OID 33035)
+-- Dependencies: 196 196 196 2179
+-- Name: userroles_pk; Type: CONSTRAINT; Schema: public; Owner: postgres; Tablespace: 
+--
+
+ALTER TABLE ONLY userroles
+    ADD CONSTRAINT userroles_pk PRIMARY KEY (uid, roleid);
+
+
+--
+-- TOC entry 1976 (class 2606 OID 19990)
+-- Dependencies: 175 175 2179
+-- Name: users_pk; Type: CONSTRAINT; Schema: public; Owner: postgres; Tablespace: 
+--
+
+ALTER TABLE ONLY users
+    ADD CONSTRAINT users_pk PRIMARY KEY (uid);
+
+
+--
+-- TOC entry 1979 (class 2606 OID 24964)
+-- Dependencies: 175 175 2179
+-- Name: users_uniqueulogin; Type: CONSTRAINT; Schema: public; Owner: postgres; Tablespace: 
+--
+
+ALTER TABLE ONLY users
+    ADD CONSTRAINT users_uniqueulogin UNIQUE (ulogin);
+
+
+--
+-- TOC entry 1996 (class 1259 OID 20290)
+-- Dependencies: 184 184 184 2179
+-- Name: config_user_net; Type: INDEX; Schema: public; Owner: postgres; Tablespace: 
+--
+
+CREATE INDEX config_user_net ON config USING btree (uid, netid, netversion);
+
+
+--
+-- TOC entry 2032 (class 1259 OID 33081)
+-- Dependencies: 200 2179
+-- Name: fki_userconfig_paramid_fk; Type: INDEX; Schema: public; Owner: postgres; Tablespace: 
+--
+
+CREATE INDEX fki_userconfig_paramid_fk ON userconfig USING btree (paramid);
+
+
+--
+-- TOC entry 2033 (class 1259 OID 33075)
+-- Dependencies: 200 2179
+-- Name: fki_userconfig_uid_fk; Type: INDEX; Schema: public; Owner: postgres; Tablespace: 
+--
+
+CREATE INDEX fki_userconfig_uid_fk ON userconfig USING btree (uid);
+
+
+--
+-- TOC entry 2019 (class 1259 OID 33032)
+-- Dependencies: 196 2179
+-- Name: fki_userroles_roleid_fk; Type: INDEX; Schema: public; Owner: postgres; Tablespace: 
+--
+
+CREATE INDEX fki_userroles_roleid_fk ON userroles USING btree (roleid);
+
+
+--
+-- TOC entry 2013 (class 1259 OID 25402)
+-- Dependencies: 193 2179
+-- Name: idagenda_idx; Type: INDEX; Schema: public; Owner: postgres; Tablespace: 
+--
+
+CREATE UNIQUE INDEX idagenda_idx ON test USING btree (idagenda);
+
+
+--
+-- TOC entry 2007 (class 1259 OID 33083)
+-- Dependencies: 191 191 2179
+-- Name: logdata_idx04; Type: INDEX; Schema: public; Owner: postgres; Tablespace: 
+--
+
+CREATE INDEX logdata_idx04 ON logdata USING btree (testid, logseq);
+
+
+--
+-- TOC entry 2010 (class 1259 OID 25263)
+-- Dependencies: 191 191 191 2179
+-- Name: logdate_idx01; Type: INDEX; Schema: public; Owner: postgres; Tablespace: 
+--
+
+CREATE INDEX logdate_idx01 ON logdata USING btree (logtime, testid, nodeid);
+
+
+--
+-- TOC entry 2011 (class 1259 OID 25264)
+-- Dependencies: 191 191 2179
+-- Name: logdate_idx02; Type: INDEX; Schema: public; Owner: postgres; Tablespace: 
+--
+
+CREATE INDEX logdate_idx02 ON logdata USING btree (logtime, testid);
+
+
+--
+-- TOC entry 2012 (class 1259 OID 25265)
+-- Dependencies: 191 2179
+-- Name: logdate_idx03; Type: INDEX; Schema: public; Owner: postgres; Tablespace: 
+--
+
+CREATE INDEX logdate_idx03 ON logdata USING btree (testid);
+
+
+--
+-- TOC entry 1985 (class 1259 OID 20294)
+-- Dependencies: 179 179 179 2179
+-- Name: netconfig_idx01; Type: INDEX; Schema: public; Owner: postgres; Tablespace: 
+--
+
+CREATE INDEX netconfig_idx01 ON netconfig USING btree (uid, netid, netversion);
+
+
+--
+-- TOC entry 1988 (class 1259 OID 20295)
+-- Dependencies: 180 2179
+-- Name: netconfigdefaultfiles_idx01; Type: INDEX; Schema: public; Owner: postgres; Tablespace: 
+--
+
+CREATE INDEX netconfigdefaultfiles_idx01 ON netconfigdefaultfiles USING btree (netconfigid);
+
+
+--
+-- TOC entry 2000 (class 1259 OID 25022)
+-- Dependencies: 186 2179
+-- Name: netconfignodes_idx01; Type: INDEX; Schema: public; Owner: postgres; Tablespace: 
+--
+
+CREATE INDEX netconfignodes_idx01 ON netconfignodes USING btree (netconfigid);
+
+
+--
+-- TOC entry 1968 (class 1259 OID 20297)
+-- Dependencies: 173 173 2179
+-- Name: network_idx01; Type: INDEX; Schema: public; Owner: postgres; Tablespace: 
+--
+
+CREATE INDEX network_idx01 ON network USING btree (netid, netversion);
+
+
+--
+-- TOC entry 1961 (class 1259 OID 20298)
+-- Dependencies: 170 170 2179
+-- Name: networks_idx01; Type: INDEX; Schema: public; Owner: postgres; Tablespace: 
+--
+
+CREATE INDEX networks_idx01 ON networks USING btree (netid, netversion);
+
+
+--
+-- TOC entry 1991 (class 1259 OID 20299)
+-- Dependencies: 182 182 182 2179
+-- Name: script_idx01; Type: INDEX; Schema: public; Owner: postgres; Tablespace: 
+--
+
+CREATE INDEX script_idx01 ON script USING btree (uid, netid, netversion);
+
+
+--
+-- TOC entry 1997 (class 1259 OID 20300)
+-- Dependencies: 185 185 2179
+-- Name: scriptsteps_idx01; Type: INDEX; Schema: public; Owner: postgres; Tablespace: 
+--
+
+CREATE INDEX scriptsteps_idx01 ON scriptsteps USING btree (scriptid, step);
+
+
+--
+-- TOC entry 2005 (class 1259 OID 25119)
+-- Dependencies: 188 2179
+-- Name: startslot; Type: INDEX; Schema: public; Owner: postgres; Tablespace: 
+--
+
+CREATE INDEX startslot ON agenda USING btree (startslot);
+
+
+--
+-- TOC entry 2014 (class 1259 OID 25403)
+-- Dependencies: 193 193 193 2179
+-- Name: test_idx02; Type: INDEX; Schema: public; Owner: postgres; Tablespace: 
+--
+
+CREATE INDEX test_idx02 ON test USING btree (uid, netid, netversion);
+
+
+--
+-- TOC entry 1980 (class 1259 OID 20011)
+-- Dependencies: 177 2179
+-- Name: userfiles_idx; Type: INDEX; Schema: public; Owner: postgres; Tablespace: 
+--
+
+CREATE INDEX userfiles_idx ON userfiles USING btree (filename);
+
+
+--
+-- TOC entry 1981 (class 1259 OID 20303)
+-- Dependencies: 177 2179
+-- Name: userfiles_idx02; Type: INDEX; Schema: public; Owner: postgres; Tablespace: 
+--
+
+CREATE INDEX userfiles_idx02 ON userfiles USING btree (uid);
+
+
+--
+-- TOC entry 1982 (class 1259 OID 20304)
+-- Dependencies: 177 2179
+-- Name: userfiles_idx03; Type: INDEX; Schema: public; Owner: postgres; Tablespace: 
+--
+
+CREATE INDEX userfiles_idx03 ON userfiles USING btree (fileid);
+
+
+--
+-- TOC entry 2006 (class 1259 OID 25120)
+-- Dependencies: 188 2179
+-- Name: userid; Type: INDEX; Schema: public; Owner: postgres; Tablespace: 
+--
+
+CREATE INDEX userid ON agenda USING btree (uid);
+
+
+--
+-- TOC entry 1973 (class 1259 OID 20305)
+-- Dependencies: 175 2179
+-- Name: users_idx01; Type: INDEX; Schema: public; Owner: postgres; Tablespace: 
+--
+
+CREATE INDEX users_idx01 ON users USING btree (uid);
+
+
+--
+-- TOC entry 1974 (class 1259 OID 20306)
+-- Dependencies: 175 2179
+-- Name: users_idx02; Type: INDEX; Schema: public; Owner: postgres; Tablespace: 
+--
+
+CREATE INDEX users_idx02 ON users USING btree (ulogin);
+
+
+--
+-- TOC entry 1977 (class 1259 OID 33082)
+-- Dependencies: 175 2179
+-- Name: users_ulogin_idx; Type: INDEX; Schema: public; Owner: postgres; Tablespace: 
+--
+
+CREATE UNIQUE INDEX users_ulogin_idx ON users USING btree (ulogin);
+
+
+--
+-- TOC entry 2073 (class 2620 OID 25121)
+-- Dependencies: 220 188 2179
+-- Name: chkagenda; Type: TRIGGER; Schema: public; Owner: postgres
+--
+
+CREATE TRIGGER chkagenda BEFORE INSERT OR UPDATE ON agenda FOR EACH ROW EXECUTE PROCEDURE chkagenda();
+
+
+--
+-- TOC entry 2074 (class 2620 OID 25122)
+-- Dependencies: 215 188 2179
+-- Name: chkdelagenda; Type: TRIGGER; Schema: public; Owner: postgres
+--
+
+CREATE TRIGGER chkdelagenda BEFORE DELETE ON agenda FOR EACH ROW EXECUTE PROCEDURE chkdelagenda();
+
+
+--
+-- TOC entry 2070 (class 2620 OID 20277)
+-- Dependencies: 217 184 2179
+-- Name: chkdelconfig; Type: TRIGGER; Schema: public; Owner: postgres
+--
+
+CREATE TRIGGER chkdelconfig BEFORE DELETE ON config FOR EACH ROW EXECUTE PROCEDURE chkdelconfig();
+
+
+--
+-- TOC entry 2067 (class 2620 OID 20281)
+-- Dependencies: 179 216 2179
+-- Name: chkdelnetconfig; Type: TRIGGER; Schema: public; Owner: postgres
+--
+
+CREATE TRIGGER chkdelnetconfig BEFORE DELETE ON netconfig FOR EACH ROW EXECUTE PROCEDURE chkdelnetconfig();
+
+
+--
+-- TOC entry 2075 (class 2620 OID 25123)
+-- Dependencies: 188 214 2179
+-- Name: update_agenda_modtime; Type: TRIGGER; Schema: public; Owner: postgres
+--
+
+CREATE TRIGGER update_agenda_modtime BEFORE UPDATE ON agenda FOR EACH ROW EXECUTE PROCEDURE update_modified_column();
+
+
+--
+-- TOC entry 2071 (class 2620 OID 20278)
+-- Dependencies: 184 214 2179
+-- Name: update_config_modtime; Type: TRIGGER; Schema: public; Owner: postgres
+--
+
+CREATE TRIGGER update_config_modtime BEFORE UPDATE ON config FOR EACH ROW EXECUTE PROCEDURE update_modified_column();
+
+
+--
+-- TOC entry 2064 (class 2620 OID 20280)
+-- Dependencies: 214 171 2179
+-- Name: update_extraslots_modtime; Type: TRIGGER; Schema: public; Owner: postgres
+--
+
+CREATE TRIGGER update_extraslots_modtime BEFORE UPDATE ON extraslots FOR EACH ROW EXECUTE PROCEDURE update_modified_column();
+
+
+--
+-- TOC entry 2068 (class 2620 OID 20282)
+-- Dependencies: 179 214 2179
+-- Name: update_netconfig_modtime; Type: TRIGGER; Schema: public; Owner: postgres
+--
+
+CREATE TRIGGER update_netconfig_modtime BEFORE UPDATE ON netconfig FOR EACH ROW EXECUTE PROCEDURE update_modified_column();
+
+
+--
+-- TOC entry 2065 (class 2620 OID 20283)
+-- Dependencies: 214 173 2179
+-- Name: update_network_modtime; Type: TRIGGER; Schema: public; Owner: postgres
+--
+
+CREATE TRIGGER update_network_modtime BEFORE UPDATE ON network FOR EACH ROW EXECUTE PROCEDURE update_modified_column();
+
+
+--
+-- TOC entry 2063 (class 2620 OID 20286)
+-- Dependencies: 170 214 2179
+-- Name: update_networks_modtime; Type: TRIGGER; Schema: public; Owner: postgres
+--
+
+CREATE TRIGGER update_networks_modtime BEFORE UPDATE ON networks FOR EACH ROW EXECUTE PROCEDURE update_modified_column();
+
+
+--
+-- TOC entry 2069 (class 2620 OID 20287)
+-- Dependencies: 214 182 2179
+-- Name: update_script_modtime; Type: TRIGGER; Schema: public; Owner: postgres
+--
+
+CREATE TRIGGER update_script_modtime BEFORE UPDATE ON script FOR EACH ROW EXECUTE PROCEDURE update_modified_column();
+
+
+--
+-- TOC entry 2072 (class 2620 OID 20284)
+-- Dependencies: 184 214 2179
+-- Name: update_test_modtime; Type: TRIGGER; Schema: public; Owner: postgres
+--
+
+CREATE TRIGGER update_test_modtime BEFORE UPDATE ON config FOR EACH ROW EXECUTE PROCEDURE update_modified_column();
+
+
+--
+-- TOC entry 2076 (class 2620 OID 25404)
+-- Dependencies: 214 193 2179
+-- Name: update_test_modtime; Type: TRIGGER; Schema: public; Owner: postgres
+--
+
+CREATE TRIGGER update_test_modtime BEFORE UPDATE ON test FOR EACH ROW EXECUTE PROCEDURE update_modified_column();
+
+
+--
+-- TOC entry 2066 (class 2620 OID 20285)
+-- Dependencies: 214 175 2179
+-- Name: update_users_modtime; Type: TRIGGER; Schema: public; Owner: postgres
+--
+
+CREATE TRIGGER update_users_modtime BEFORE UPDATE ON users FOR EACH ROW EXECUTE PROCEDURE update_modified_column();
+
+
+--
+-- TOC entry 2056 (class 2606 OID 25382)
+-- Dependencies: 188 193 2003 2179
+-- Name: agenda_testconfig_fk; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY test
+    ADD CONSTRAINT agenda_testconfig_fk FOREIGN KEY (idagenda) REFERENCES agenda(idagenda);
+
+
+--
+-- TOC entry 2057 (class 2606 OID 25387)
+-- Dependencies: 193 184 1994 2179
+-- Name: config_test_fk; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY test
+    ADD CONSTRAINT config_test_fk FOREIGN KEY (configid) REFERENCES config(configid);
+
+
+--
+-- TOC entry 2052 (class 2606 OID 20238)
+-- Dependencies: 185 182 1992 2179
+-- Name: execplanuserconfig_execplansteps_fk; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY scriptsteps
+    ADD CONSTRAINT execplanuserconfig_execplansteps_fk FOREIGN KEY (scriptid) REFERENCES script(scriptid);
+
+
+--
+-- TOC entry 2050 (class 2606 OID 20233)
+-- Dependencies: 1986 179 184 2179
+-- Name: netconfig_config_fk; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY config
+    ADD CONSTRAINT netconfig_config_fk FOREIGN KEY (netconfigid) REFERENCES netconfig(netconfigid);
+
+
+--
+-- TOC entry 2053 (class 2606 OID 25012)
+-- Dependencies: 186 1986 179 2179
+-- Name: netuserconfig_netuserconfignodes_fk; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY netconfignodes
+    ADD CONSTRAINT netuserconfig_netuserconfignodes_fk FOREIGN KEY (netconfigid) REFERENCES netconfig(netconfigid);
+
+
+--
+-- TOC entry 2045 (class 2606 OID 20228)
+-- Dependencies: 1986 179 180 2179
+-- Name: netuserconfig_netuserdefaultfiles_fk; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY netconfigdefaultfiles
+    ADD CONSTRAINT netuserconfig_netuserdefaultfiles_fk FOREIGN KEY (netconfigid) REFERENCES netconfig(netconfigid);
+
+
+--
+-- TOC entry 2048 (class 2606 OID 20138)
+-- Dependencies: 1962 170 170 184 184 2179
+-- Name: networks_config_fk; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY config
+    ADD CONSTRAINT networks_config_fk FOREIGN KEY (netid, netversion) REFERENCES networks(netid, netversion);
+
+
+--
+-- TOC entry 2041 (class 2606 OID 20143)
+-- Dependencies: 179 179 170 1962 170 2179
+-- Name: networks_netconfig_fk; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY netconfig
+    ADD CONSTRAINT networks_netconfig_fk FOREIGN KEY (netid, netversion) REFERENCES networks(netid, netversion);
+
+
+--
+-- TOC entry 2037 (class 2606 OID 20158)
+-- Dependencies: 170 173 170 1962 173 2179
+-- Name: networks_networkx_fk; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY network
+    ADD CONSTRAINT networks_networkx_fk FOREIGN KEY (netversion, netid) REFERENCES networks(netversion, netid);
+
+
+--
+-- TOC entry 2046 (class 2606 OID 20118)
+-- Dependencies: 182 182 1962 170 170 2179
+-- Name: networks_script_fk; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY script
+    ADD CONSTRAINT networks_script_fk FOREIGN KEY (netid, netversion) REFERENCES networks(netid, netversion);
+
+
+--
+-- TOC entry 2058 (class 2606 OID 25392)
+-- Dependencies: 170 193 193 1962 170 2179
+-- Name: networks_test_fk; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY test
+    ADD CONSTRAINT networks_test_fk FOREIGN KEY (netid, netversion) REFERENCES networks(netid, netversion);
+
+
+--
+-- TOC entry 2036 (class 2606 OID 20108)
+-- Dependencies: 1959 169 173 2179
+-- Name: nodestatus_network_fk; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY network
+    ADD CONSTRAINT nodestatus_network_fk FOREIGN KEY (statusid) REFERENCES nodestatus(statusid);
+
+
+--
+-- TOC entry 2043 (class 2606 OID 20173)
+-- Dependencies: 180 172 1966 2179
+-- Name: nodestype_netconfigdefaultfiles_fk; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY netconfigdefaultfiles
+    ADD CONSTRAINT nodestype_netconfigdefaultfiles_fk FOREIGN KEY (nodetype) REFERENCES nodestype(nodetype);
+
+
+--
+-- TOC entry 2038 (class 2606 OID 20163)
+-- Dependencies: 1966 173 172 2179
+-- Name: nodestype_network_fk; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY network
+    ADD CONSTRAINT nodestype_network_fk FOREIGN KEY (nodetype) REFERENCES nodestype(nodetype);
+
+
+--
+-- TOC entry 2039 (class 2606 OID 20168)
+-- Dependencies: 177 172 1966 2179
+-- Name: nodestype_userfiles_fk; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY userfiles
+    ADD CONSTRAINT nodestype_userfiles_fk FOREIGN KEY (nodetype) REFERENCES nodestype(nodetype);
+
+
+--
+-- TOC entry 2051 (class 2606 OID 20243)
+-- Dependencies: 182 1992 184 2179
+-- Name: script_config_fk; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY config
+    ADD CONSTRAINT script_config_fk FOREIGN KEY (scriptid) REFERENCES script(scriptid);
+
+
+--
+-- TOC entry 2062 (class 2606 OID 33076)
+-- Dependencies: 200 2030 199 2179
+-- Name: userconfig_paramid_fk; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY userconfig
+    ADD CONSTRAINT userconfig_paramid_fk FOREIGN KEY (paramid) REFERENCES configparams(paramid);
+
+
+--
+-- TOC entry 2061 (class 2606 OID 33070)
+-- Dependencies: 200 175 1975 2179
+-- Name: userconfig_uid_fk; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY userconfig
+    ADD CONSTRAINT userconfig_uid_fk FOREIGN KEY (uid) REFERENCES users(uid);
+
+
+--
+-- TOC entry 2044 (class 2606 OID 20218)
+-- Dependencies: 1983 180 177 2179
+-- Name: userfiles_netconfigdefaultfiles_fk; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY netconfigdefaultfiles
+    ADD CONSTRAINT userfiles_netconfigdefaultfiles_fk FOREIGN KEY (fileid) REFERENCES userfiles(fileid);
+
+
+--
+-- TOC entry 2054 (class 2606 OID 25017)
+-- Dependencies: 177 186 1983 2179
+-- Name: userfiles_netconfignodes_fk; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY netconfignodes
+    ADD CONSTRAINT userfiles_netconfignodes_fk FOREIGN KEY (fileid) REFERENCES userfiles(fileid);
+
+
+--
+-- TOC entry 2060 (class 2606 OID 33027)
+-- Dependencies: 196 195 2017 2179
+-- Name: userroles_roleid_fk; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY userroles
+    ADD CONSTRAINT userroles_roleid_fk FOREIGN KEY (roleid) REFERENCES roles(roleid);
+
+
+--
+-- TOC entry 2055 (class 2606 OID 25113)
+-- Dependencies: 175 1975 188 2179
+-- Name: users_agenda_fk; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY agenda
+    ADD CONSTRAINT users_agenda_fk FOREIGN KEY (uid) REFERENCES users(uid);
+
+
+--
+-- TOC entry 2049 (class 2606 OID 20198)
+-- Dependencies: 175 184 1975 2179
+-- Name: users_config_fk; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY config
+    ADD CONSTRAINT users_config_fk FOREIGN KEY (uid) REFERENCES users(uid);
+
+
+--
+-- TOC entry 2047 (class 2606 OID 20188)
+-- Dependencies: 175 1975 182 2179
+-- Name: users_execplanconfig_fk; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY script
+    ADD CONSTRAINT users_execplanconfig_fk FOREIGN KEY (uid) REFERENCES users(uid);
+
+
+--
+-- TOC entry 2042 (class 2606 OID 20193)
+-- Dependencies: 175 1975 179 2179
+-- Name: users_netconfig_fk; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY netconfig
+    ADD CONSTRAINT users_netconfig_fk FOREIGN KEY (uid) REFERENCES users(uid);
+
+
+--
+-- TOC entry 2059 (class 2606 OID 25397)
+-- Dependencies: 1975 175 193 2179
+-- Name: users_testconfig_fk; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY test
+    ADD CONSTRAINT users_testconfig_fk FOREIGN KEY (uid) REFERENCES users(uid);
+
+
+--
+-- TOC entry 2040 (class 2606 OID 20203)
+-- Dependencies: 1975 177 175 2179
+-- Name: users_userfiles_fk; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY userfiles
+    ADD CONSTRAINT users_userfiles_fk FOREIGN KEY (uid) REFERENCES users(uid);
+
+
+--
+-- TOC entry 2184 (class 0 OID 0)
+-- Dependencies: 5
+-- Name: public; Type: ACL; Schema: -; Owner: postgres
+--
+
+REVOKE ALL ON SCHEMA public FROM PUBLIC;
+REVOKE ALL ON SCHEMA public FROM postgres;
+GRANT ALL ON SCHEMA public TO postgres;
+GRANT ALL ON SCHEMA public TO PUBLIC;
+
+
+-- Completed on 2015-03-01 22:51:23 BRT
+
+--
+-- PostgreSQL database dump complete
+--
+

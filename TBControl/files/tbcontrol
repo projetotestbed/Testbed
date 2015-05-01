@@ -1,0 +1,54 @@
+#!/bin/bash
+### BEGIN INIT INFO
+# Provides:       tbcontrol
+# Required-Start: postgres
+# Required-Stop:
+# Default-Start:  2 3 4 5
+# Default-Stop:   0 1 6
+# Short-Description: Stop/Start/Restart TBControl on System shutdown
+### END INIT INFO
+
+TBCUSER=projetotestbed
+TBCPATH=/home/projetotestbed/Testbed/TBControl
+TBCPROG=TBControl.jar
+SU="sudo -H -u $TBCUSER"
+DATABASE=portal2
+DBUSER=postgres
+PGPWD=postgres
+SQL_COMMAND="select distinct(netid) from networks;"
+TARGETS=$($SU PGPASSWORD=$PGPWD psql -d $DATABASE -h localhost -U $DBUSER -t -c "$SQL_COMMAND")
+START_COMMAND="java -jar $TBCPROG"
+START_TIME=`date '+%Y%d%m-%H%M%S'`
+REMOVE_DAYS=30
+
+do_stop() {
+	pkill -f "java -jar TBControl.jar"
+}
+
+do_start(){
+	find $TBCPATH/logs/tbc_*-*.log -mtime +$REMOVE_DAYS -exec rm {} \;
+	for netId in $TARGETS; do
+		mv $TBCPATH/logs/tbc_$netId.log $TBCPATH/logs/tbc_$netId-$START_TIME.log 2>/dev/null
+		cd $TBCPATH
+    		echo "Starting TBControl netId=$netId" && $SU $START_COMMAND $netId >> $TBCPATH/logs/tbc_$netId.log & > /dev/null
+	done
+}
+
+case $1 in
+stop)
+	do_stop
+;;
+start)
+	do_start
+;;
+restart)
+	echo "* Restarting TBControl"
+	do_stop
+	sleep 10
+	do_start
+;;
+*)
+echo "Usage: /etc/init.d/tbcontrol start | stop | restart"; exit 1
+;;
+esac
+exit 0

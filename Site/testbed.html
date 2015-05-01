@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    <meta charset="utf-8">
+    <title>Céu na Terra</title>
+    <meta name="generator" content="Bootply" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+    <!--[if lt IE 9]>
+      <script src="//html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link href="css/styles.css" rel="stylesheet">
+  </head>
+<body>
+  <div class="page-container">  
+    <!-- top navbar -->     
+    <div class="navbar navbar-inverse navbar-fixed-top" role="navigation"> 
+      <div class="container">
+        <div class="navbar-header">
+          <!--<button type="button" class="navbar-toggle" data-toggle="offcanvas" data-target=".sidebar-nav">
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>-->           
+          <a class="navbar-brand" href="index.html">Home</a>
+        </div>
+        <nav class="collapse navbar-collapse" role="navigation">
+          <ul class="nav navbar-nav">
+           <li>
+             <a href="sobre_projeto.html">Sobre o Projeto</a>
+           </li>
+           <li class="active">
+            <a href="testbed.html">Testbed Céu na Terra</a>
+           </li>
+           <li>
+             <a href="tutoriais.html">Tutoriais</a>
+           </li>
+           <li>
+             <a href="contato.html">Contato</a>
+           </li>
+           <li>
+            <a href="/TBportal" target="_blank">Acesso ao Testbed</a>
+           </li>
+          </ul>  
+        </nav>
+      </div>
+    </div>
+    <div id="masthead">  
+      <div class="container">
+        <div class="row">
+          <div class="col-md-7">
+            <h1><b>GT-TeI</b>
+              <p class="lead">Grupo de Trabalho - Testbed para Espaços Inteligentes</p>
+            </h1>
+          </div>
+          <!--<div class="col-md-5">
+            <div class="well well-lg"> 
+              <div class="row">
+                <div class="col-sm-6">
+                  <img src="//placehold.it/180x100" class="img-responsive">
+                </div>
+                <div class="col-sm-6">
+                  Some text here
+                </div>
+              </div>
+            </div>
+          </div>-->
+        </div> 
+      </div><!--/container-->
+    </div><!--/masthead-->  
+    <div class="container">
+      <div class="row row-offcanvas row-offcanvas-left">
+        <!-- sidebar -->
+        <div class="col-xs-6 col-sm-3 sidebar-offcanvas" id="sidebar" role="navigation">
+          <div data-spy="affix" data-offset-top="45" data-offset-bottom="90">
+            <ul class="nav" id="sidebar-nav">
+              <li><a href="#definicao">Definição</a></li>
+              <li><a href="#arquitetura_fisica">Arquitetura Física do Testbed </a></li>
+              <li><a href="#topologia_atual">Topologia Atual</a></li>
+              <li><a href="#extensoes_previstas">Extensões Previstas</a></li>
+              <li><a href="#arquitetura_funcional">Arquitetura Funcional do Testbed </a></li>
+              <!--<li><a href="#sec5">Mapa dos Nós</a></li>-->
+              <li><a href="#tecnologias_utilizadas">Tecnologias Utilizadas</a></li>
+              <li><a href="#componentes_desenvolvidos">Componentes Desenvolvidos</a></li>
+              <!--<li><a href="#sec8">Ferramentas Integradas ao Testbed</a></li>-->
+              <li><a href="#terra">Terra</a></li></li>
+            </ul>
+           </div>
+        </div>
+        <!-- main area -->
+        <div class="col-xs-12 col-sm-9" data-spy="scroll" data-target="#sidebar-nav">
+          <h2 id="definicao">Definição</h2>
+          <p><b>O que é um Testbed para RSSF?</b></p>
+          <p>
+            Um testbed para Redes de Sensores sem Fio (RSSF) é tipicamente 
+            composto por um conjunto de nós sensores previamente 
+            distribuídos numa área específica. Cada nó da rede é interligado 
+            a um computador de controle. O computador de controle, por sua 
+            vez, é
+            responsável pela carga do código executável em cada nó e pela 
+            interface de interação com o usuário durante a execução dos 
+            testes.
+          </p>
+          <h2 id="arquitetura_fisica">Arquitetura Física do Testbed</h2>
+          <p>
+            O testbed <i>Céu na Terra</i> foi projetado para ambientes fechados, 
+            sendo constituído por nós sensores de tipos diferentes, 
+            dispostos em uma topologia que requer comunicação multi-saltos, 
+            acoplados a um board para carga de código e transferência de 
+            dados de execução, com fonte de energia constante, gerenciado 
+            por um sistema de controle executado numa máquina central com 
+            interface de acesso remoto via Web. A figura abaixo apresenta a 
+            arquitetura geral do testbed <i>Céu na Terra</i>, destacando seus 
+            módulos principais: Kit Nó e Kit Servidor.
+          </p>
+          <div class="row">
+            <div class="col-md-10" align="center">
+              <div class="panel panel-default">
+                <div class="panel-body">
+                  <img src="img/arq1.png" alt="Smiley face" height="280" width="650">
+                </div>
+              </div>
+            </div>
+          </div>
+          <p>
+            O núcleo da arquitetura é o Kit Nó que contém os componentes 
+            necessários para o funcionamento completo de um nó da rede do
+           testbed: interfaces externas de rádio, sensores físicos, núcleo 
+           de processamento, interface de controle e fonte de alimentação de 
+           energia. A figura abaixo mostra os componentes principais do Kit 
+           Nó.
+          </p>
+          <div class="row">
+            <div class="col-md-10" align="center">
+              <div class="panel panel-default">
+                <div class="panel-body">
+                  <img src="img/arq2.png" alt="Smiley face" height="370" width="650">
+                </div>
+              </div>
+            </div>
+          </div>        
+          <h4>Hardware Utilizado</h4>
+          <p> Atualmente, o testbed <i>Céu na Terra</i> contém dois tipos de Kit 
+            Nó, um com o mote MicaZ e o outro com o mote TelosB.O 
+            <a href="http://www.openautomation.net/uploadsproductos/micaz_datasheet.pdf" target="_blank">Kit Nó 
+            MicaZ</a> tem a sequinte configuração:</p>
+          <p>1. Módulo Processador + Rádio</p>
+          <ul>
+             <li>Código fabricante - MPR2400CA</li>
+             <li>CPU - Atmel ATmega128L</li>
+             <li>CPU - Atmel ATmega128L</li>
+             <li>ROM - 128K bytes</li>
+             <li>RAM - 4K bytes</li>
+             <li>Data - Flash Memory de 512Kbytes</li>
+             <li>Rádio - Chipcon CC2420 - 2.4 GHz IEEE 802.15.4</li>
+             <li>Interface Controle - Conector Proprietário 51-pinos</li>
+          </ul>
+          <div class="row">
+            <div class="col-md-10" align="center">
+              <div class="panel panel-default">
+                <div class="panel-body">
+                  <img src="img/arq3.png" alt="Smiley face" height="600" width="650">
+                </div>
+              </div>
+            </div>
+          </div>
+          <p>2. Módulo Sensor</p>
+          <ul>
+            <li>Código fabricante - MDA100CA</li>
+            <li>Sensor de temperatura</li>
+            <li>Sensor de luminosidade</li>
+            <li>Área para protótipo</li>
+            <li>Permite a conexão simultânea de mais 2 módulos com utilizando Conector
+            Proprietário 51-pinos.</li>
+          </ul>
+          <p>3. Módulo Interface de Rede</p>
+          <ul>
+            <li>Código fabricante - MIB600</li>
+            <li>Conector RJ-45 100 Base</li>
+            <li>Interface IEEE 802.3 / IEEE 802.3af POE</li>
+            <li>Interface Controle - Conector Proprietário 51-pinos</li>
+            <li>Protocolos ARP, UDP/IP, TCP/IP, Telnet, DHCP, BOOTP, TFTP, Auto IP,
+            and HTTP</li>
+          </ul>
+          <p>4. Módulo de Alimentação</p>
+          <ul>
+            <li>Disponibilizado em conjunto com o Módulo Interface de rede MIB600.</li>
+            <li>Compatível com o conjunto MicaZ + MDA100</li>
+          </ul>
+          <div class="row">
+            <div class="col-md-9" align="center">
+              <div class="panel panel-default">
+                <div class="panel-body">
+                  <img src="img/arq4.png" alt="Smiley face" height="320" width="600">
+                </div>
+              </div>
+            </div>
+          </div>  
+          <p>
+            O <a href="http://www.willow.co.uk/TelosB_Datasheet.pdf" target="
+            _blank"> Kit Nó TelosB</a> é formado por componentes de dois 
+            fabricantes: o mote TelosB (incluir o link: ) e o adaptador SX-
+            3000GB fabricado pela Silex Technology. O kit tem a
+            seguinte configuração:
+          </p>
+          <p>1. Módulo Processador + Rádio + Sensor + Interface Controle</p> 
+          <ul>
+            <li> Código fabricante - TPR2420CA</li>            
+            <li> CPU - TI MSP430</li>
+            <li> ROM - 48K bytes</li>
+            <li> RAM - 10K bytes</li>
+            <li> Data - Flash memory 1024K bytes</li>
+            <li> Data - EEPROM 16K bytes</li>           
+            <li> Rádio - Chipcon CC2420 - 2.4 GHz IEEE 802.15.4</li>
+            <li> Interface Controle - Padrão USB</li>
+            <li> Sensor de temperatura</li>
+            <li> Sensor de luminosidade</li>
+            <li> Sensor de umidade</li>
+          </ul>
+          <p>2. Módulo Interface rede</p>
+          <ul>
+            <li>Código fabricante - SX-3000GB</li>
+            <li>Conector RJ-45 10 / 100 / 1000 Base</li>
+            <li>Interface IEEE 802.3</li>
+            <li>Interface USB 2.0 Hi-Speed (A-Type)</li>
+            <li>Protocolo TCP/IP</li>
+          </ul>
+          <p>3. Módulo de alimentação</p>
+          <ul>
+            <li>Disponibilizado em conjunto com o Módulo Interface de rede SX-3000GB.</li>
+          </ul>
+          <div class="row">
+            <div class="col-md-9" align="center">
+              <div class="panel panel-default">
+                <div class="panel-body">
+                  <img src="img/arq5.png" alt="Smiley face" height="320" width="600">
+                </div>
+              </div>
+            </div>
+          </div>  
+          <br />
+          <hr>
+          <h2 id="topologia_atual">Topologia Atual</h2>
+          <p>
+            Atualmente o testbed <i>Céu na Terra</i> possui  em operação 14 kits 
+            MicaZ e 5 kits TelosB agrupados em dois ambientes distintos (
+            separados fisicamente). 
+          </p>
+          <h4> Ambiente I </h4>
+          <div class="row">
+            <div class="col-md-10" align="center">
+              <div class="panel panel-default">
+                <div class="panel-body">
+                  <img src="img/topovoip2.jpg" alt="Smiley face" height="320" width="600">
+                </div>
+              </div>
+            </div>
+          </div> 
+          <h4> Ambiente II </h4>
+          <div class="row">
+            <div class="col-md-10" align="center">
+              <div class="panel panel-default">
+                <div class="panel-body">
+                  <img src="img/topomot2.jpg" alt="Smiley face" height="520" width="645">
+                </div>
+              </div>
+            </div>
+          </div> 
+          <h2 id="extensoes_previstas">Extensões Previstas</h2>
+          <p>
+            A arquitetura atual do testbed será estendida incluindo-se novas 
+            plataformas de sensores sendo: 
+          </p>
+          <ul>
+            <li>5 (cinco) exemplares da plataforma Arduino </li>
+            <li>7 (sete) Raspberry PI </li>
+            <li>1 (um) kit VirtualSense </li>
+            <li>1 (um) kit Waspmote </li>
+          </ul>
+          <p>
+            O objetivo é aumentar a heterogeneidade de plataformas do 
+            testbed, permitindo a realização de experimentos mais 
+            diversificados, e explorar o uso de dispositivos com maior 
+            capacidade de memória e de processamento que poderão assumir 
+            papeis especiais na rede, como por exemplo roteadores. 
+          </p> 
+          <h2 id="arquitetura_funcional">Arquitetura Funcional do Testbed</h2>
+          <p>
+            O testbed <i>Céu na Terra</i> é formado basicamente por três partes: 
+            <ul>
+              <li>A rede de sensores sem fio</li> 
+              <li>O controle geral</li> 
+              <li>A interface de operação</li>
+            </ul> 
+          </p>  
+          <p>
+            A rede de sensores sem fio é formada pelo conjunto de 
+            dispositivos distribuídos fisicamente por uma área que forma o 
+            testbed. A comunicação entre os nós é feita via rádio e o 
+            alcance entre cada par de nós da rede depende da distância entre 
+            eles e da potência do sinal de rádio. Todos os nós da rede estão 
+            acoplados fisicamente a um dispositivo conectado a uma rede 
+            cabeada. Essa conexão serve tanto para o controle da carga de 
+            código executável nos nós sensores, quanto para o envio de 
+            mensagens de dados pelo canal serial de cada nó. 
+          </p>
+          <p>
+            O controle geral é composto por módulos básicos que controlam a 
+            execução dos testes no testbed. As principais funcionalidades são:
+            <ul>
+              <li>O Controle de execução</li>
+              <li>O Controle de agendamentos das janelas de execução</li>
+              <li>O Controle de acesso</li>
+            </ul>
+          </p>
+          <p>
+            A interface de operação é composta por quatro funcionalidades: 
+            agendamento,
+            configuração, execução e  acesso. 
+          </p>
+          <p>
+            A Interface de Agendamento permite ao usuário consultar, 
+            reservar e cancelar as janelas de execução no testbed. Na 
+            Interface de Configuração o usuário pode configurar a topologia 
+            da rede com a ativação e desativação de determinados nós, 
+            armazenar o seu código executável para posterior execução na 
+            rede de sensores e definir condições de execução específicas 
+            para o seu teste. A Interface de Execução permite ao usuário 
+            controlar e monitorar o andamento dos testes. A Interface de 
+            Acesso controla o acesso do usuário aos recursos do testbed.
+          </p>
+          <div class="row">
+            <div class="col-md-10" align="center">
+              <div class="panel panel-default">
+                <div class="panel-body">
+                  <img src="img/arq6.png" alt="Smiley face" height="350" width="650">
+                </div>
+              </div>
+            </div>
+          </div>  
+          <br/>     
+          <h2 id="tecnologias_utilizadas">Tecnologias Utilizadas</h2>
+          <p>1- Sistemas Operacionais:</p>
+            <ul>
+              <li>Ubuntu 14.04.01 64 bits</li>
+              <li>Windows 7 em Máquina Virtual</li>
+            </ul>
+          <p>2- Softwares de domínio público:</p>
+          <ul> 
+            <li>Java 1.7.0</li>
+            <li>VirtualBox 4.3.2</li>
+            <li>PostgreSQL 9.3</li>
+            <li>Pgadmin 1.14.0</li>
+            <li>Apache</li>
+            <li>Python 2.7.7</li>
+            <li>Pyserial</li>
+            <li>Uisp Tools</li>
+			<li>Lua</li>
+			<li>Git</li>
+            <li>Cygwin</li>
+          </ul>
+          <h2 id="componentes_desenvolvidos">Componentes Desenvolvidos</h2>        
+          <ul>
+            <li><b>TBportal</b> - Pacote de instalação do portal de 
+              controle do testbed. Contém toda implementação do Portal. 
+              Possui as páginas e servlets utilizados para o sistema.</li>
+            <li><b>TBControl_cygwin</b> - Pacote de instalação do Sistema 
+              Controle na plataforma Windows.</li>
+            <li><b>TBControl_linux</b> - Pacote de instalação do Sistema 
+              Controle na plataforma Linux. Contém os módulos responsáveis 
+              pelo controle e execução dos testes.</li>
+            <li><b>BD</b> - Banco de Dados desenvolvido para o Testbed</li>
+	      </ul>  
+          <!--<h2 id="sec8">Ferramentas Integradas ao Testbed</h2>-->
+          <h2 id="terra">Terra</h2>
+          <p>
+            <a href="http://www.inf.puc-rio.br/~abranco/terra.html" target=
+            "_blank"> Terra</a> é um sistema que implementa um ambiente de 
+            programação baseado em uma linguagem reativa de alto-nível com 
+            execução segura e utiliza uma máquina virtual que integra componentes customizados.
+          </p>
+          <div class="row">
+            <div class="col-md-6" align="left">
+              <div class="panel panel-default">
+                <div class="panel-body">
+                  <img src="img/arq7.png" alt="Smiley face" height="320" width="390">
+                </div>
+              </div>
+            </div>
+            <div class="col-md-6" align="center">
+              <div class="panel panel-default">
+                <div class="panel-body">
+                  <img src="img/arq8.png" alt="Smiley face" height="320" width="320">
+                </div>
+              </div>
+            </div>
+          </div>
+          <p>
+            Terra usa a linguagem Céu, uma linguagem de programação 
+            reativa que segue a abordagem de divisão em fases,
+            a qual se adequa muito bem ao modelo tradicional orientado a 
+            eventos de aplicações para RSSF.
+            O hardware usado em RSSFs tradicionalmente mantém a CPU 
+            dormindo até que seja recebida uma interrupção. Neste caso, as 
+            interrupções funcionam como sistema de eventos.
+            Além disso, as verificações feitas por Céu, tanto em tempo de 
+            compilação quanto em tempo de execução, oferecem importantes 
+            garantias para programação em ambientes remotamente 
+            distribuídos.
+          </p>
+          <p>
+            As operações customizadas são construídas como componentes, 
+            embarcadas no ambiente de execução da máquina virtual, e 
+            acessadas como comandos extendidos de Céu.
+            Em geral, essas operações representam abstrações específicas 
+            utilizadas pelo <i>expert</i> no domínio para a construção da 
+            aplicação.
+          </p>  
+          <br/>
+          <font size="4"> <a href="#definicao">Topo</a></font>
+          <hr>            
+        </div><!-- /.col-xs-12 main -->
+      </div><!--/.row-->
+    </div><!--/.container-->
+  </div><!--/.page-container-->
+  <div id="footer"><!--footer-->
+    <div class="container">
+      <div class="row">
+        © 2015 GT-TeI <!-- <a href="contato.html">Contato</a>-->
+  	  </div><!--/row-->
+    </div><!--/container-->
+  </div><!--/footer-->
+  <!-- script references -->
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.2/jquery.min.js"></script>
+  <script src="js/bootstrap.min.js"></script>
+  <script src="js/scripts.js"></script>
+</body>
+</html>

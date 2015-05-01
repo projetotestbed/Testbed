@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    <meta charset="utf-8">
+    <title>Tutoriais</title>
+    <meta name="generator" content="Bootply" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+    <!--[if lt IE 9]>
+      <script src="//html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link href="css/styles.css" rel="stylesheet">
+  </head>
+<body>
+  <div class="page-container">  
+    <!-- top navbar -->     
+    <div class="navbar navbar-inverse navbar-fixed-top" role="navigation"> 
+      <div class="container">
+        <div class="navbar-header">
+          <!--<button type="button" class="navbar-toggle" data-toggle="offcanvas" data-target=".sidebar-nav">
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>-->           
+          <a class="navbar-brand" href="index.html">Home</a>
+        </div>
+        <nav class="collapse navbar-collapse" role="navigation">
+          <ul class="nav navbar-nav">
+           <li>
+             <a href="sobre_projeto.html">Sobre o Projeto</a>
+           </li>
+           <li>
+            <a href="testbed.html">Testbed Céu na Terra</a>
+           </li>
+           <li class="active">
+             <a href="tutoriais.html">Tutoriais</a>
+           </li>
+           <li>
+             <a href="contato.html">Contato</a>
+           </li>
+           <li>
+            <a href="/TBportal" target="_blank">Acesso ao Testbed</a>
+           </li>
+          </ul>  
+        </nav>
+      </div>
+    </div>
+    <div id="masthead">  
+      <div class="container">
+        <div class="row">
+          <div class="col-md-7">
+            <h1><b>GT-TeI</b>
+              <p class="lead">Grupo de Trabalho - Testbed para Espaços Inteligentes</p>
+            </h1>
+          </div>
+          <!--<div class="col-md-5">
+              <div class="well well-lg"> 
+                <div class="row">
+                  <div class="col-sm-6">
+                    <img src="//placehold.it/180x100" class="img-responsive">
+                  </div>
+                  <div class="col-sm-6">
+                    Some text here
+                  </div>
+                </div>
+              </div>
+          </div>-->
+        </div> 
+      </div><!--/container-->
+    </div><!--/masthead-->  
+    <div class="container">
+      <div class="row row-offcanvas row-offcanvas-left">
+        <!-- sidebar -->
+        <div class="col-xs-6 col-sm-3 sidebar-offcanvas" id="sidebar" role="navigation">
+          <div data-spy="affix" data-offset-top="45" data-offset-bottom="90">
+            <ul class="nav" id="sidebar-nav">
+              <li><a href="#configuracao">Configuração e Realização de Experimentos</a></li>
+              <li><a href="#aplicacoes">Exemplos de Aplicações</a></li>
+                <!--<ul>
+                  <li><a href="#section3">Monitoramento de Água</a></li>
+                  <li><a href="#section4">Casa Inteligente</a></li>
+                </ul>-->
+              <li><a href="#instale_testbed">Instale seu próprio Testbed</a></li>
+              <!--<li><a href="#section3">Aplicações de Monitoramento</a></li>
+              <ul>
+                  <li>Tutoriais(pdf)</li>
+                  <li>Códigos Fonte</li>
+                  <li>Arquivos Executáveis</li>
+              </ul>-->         
+            </ul>
+           </div>
+        </div>
+        <!-- main area -->
+        <div class="col-xs-12 col-sm-9" data-spy="scroll" data-target="#sidebar-nav">
+          <h2 id="configuracao">Configuração e Realização de Experimentos</h2>
+          <p>
+            Para testar a configuração e realização de experimentos no testbed
+            faça download do tutorial para as aplicações TestSerial, 
+            TestPromiscuous e BlinkToRadio. Essas aplicações já vêm 
+            distribuídas com o TinyOS.<br /><br />
+            <a href="data/conf_exec.pdf" download><b>Download Tutorial.pdf</b></a>
+          </p>
+          <h2 id="aplicacoes">Exemplos de Aplicações</h2>
+          <h4 id="monitoramento_agua"><b>Monitoramento de Água</b></h4>
+          <p>
+            A aplicação <i>WaterMonitor</i> tem como objetivo realizar um 
+            processamento dos dados
+            coletados através dos sensores da RSSF. Esse processamento 
+            consiste em armazenar as
+            informações coletadas (temperatura, luminosidade, oxigênio, etc.)
+             em um banco de dados e
+            gerar um gráfico de variação com base no que foi armazenado. A 
+            aplicação oferece uma
+            interface através da qual o usuário pode selecionar o sensor e 
+            selecionar o tipo de
+            informação que deseja gerar o gráfico. O gráfico é gerado em 
+            tempo real: conforme os
+            sensores realizam a coleta dos dados, a aplicação armazena as
+            informações em um
+            banco de dados e então gera o gráfico dessas informações.
+          </p>
+          <p>
+            Esta aplicação é dividida em duas partes: Uma parte é executada
+            na rede de sensores (coletando os dados e enviando dados para o 
+            gateway) e outra parte é executada em um 
+            gateway (processando os dados coletados).
+            A parte executada na rede de sensores foi desenvolvida para 
+            a plataforma Contiki e para a plataforma TinyOS. Já a parte 
+            que executa no gateway foi desenvolvida em Java.
+          </p>
+          <p>
+            <br />
+            <b><a href="data/WaterMonitor.zip" download>Download WaterMonitor.zip</a></b>
+            <br />
+            <br />
+            Este arquivo contém:
+            <ul>
+              <li>Manual de Instalação/Execução</li>
+              <li>Arquivos de configuração</li>
+              <li>Código fonte da aplicação Contiki e TinyOS (que será 
+              executada na RSSF)</li>
+              <li>Código fonte da aplicação Java (que será executada no 
+              gateway para processamento dos dados)</li>
+              <li>Scripts de execução</li>
+              <li>Arquivos executáveis das aplicações em Contiki, TinyOS e Java.</li>
+            </ul> 
+          </p>
+          <h4 id="casa_inteligente"><b>Casa Inteligente</b></h4>  
+          <p>
+            No conceito de casas inteligentes, os equipamentos 
+            lâmpada, TV, rádio, fogão e termostato podem se comunicar e  
+            podemos 
+            remotamente controlar suas funções. Esta aplicação considera cada 
+            um
+            dos motes (nós da rede) como sendo o controlador de um desses 
+            equipamentos. De acordo com o tipo de dispositivo que o mote esteja
+            controlando, ele será associado a um conjunto de operações que 
+            poderá realizar e um conjunto de informações que poderá prover.
+            Definimos cinco tipos de equipamentos que serão controlados.
+            A seguir indicamos esses equipamentos e as informações recebidas e 
+            comandos que eles oferecem:
+          </p>
+          <ul>
+            <li>Lâmpada</li>
+              <ul>
+                <li>Informações: status (ligado/desligado).</li>
+                <li>Comandos: ligar/desligar.</li>
+              </ul>
+            <li>Termostato</li>
+              <ul>
+                <li>Informações: status do sistema de climatização e a temperatura atual configurada.</li>
+                <li>Comandos: ligar/desligar, alterar da temperatura.</li>
+              </ul>
+            <li>Rádio</li>
+              <ul>
+                <li>Informações: status do rádio, estação sintonizada e volume.</li>
+                <li>Comandos: ligar/desligar, alterar estação, alterar volume.</li>
+              </ul>
+            <li>TV</li>
+              <ul>
+                <li>Informações: status do TV, canal sintonizado e volume.</li>
+                <li>Comandos: ligar/desligar, alterar canal, alterar volume.</li>
+              </ul>
+            <li>Fogão</li>
+              <ul>
+                <li>Informações: status de cada boca e do forno, temperatura atual do forno.</li>
+              </ul>
+          </ul>
+          <p>
+            Esta aplicação é dividida em duas partes: Uma parte é executada
+            na rede de sensores (simulam o controle dos dispositivos da casa)
+            e outra parte é executada em um 
+            gateway (de onde se controla os dispositivos).
+            A parte executada na rede de sensores foi desenvolvida para 
+            a plataforma Contiki e para a plataforma TinyOS. Já a parte 
+            que executa no gateway foi desenvolvida em Java.
+          </p> 
+          <p>
+            <br />
+            <b><a href="data/SmartHome.zip" download>Download SmartHome.zip</a></b>
+            <br />
+            <br />
+            Este arquivo contém:
+            <ul>
+              <li>Manual de Instalação/Execução</li>
+              <li>Arquivos de configuração</li>
+              <li>Código fonte da aplicação Contiki e TinyOS (que será executada na RSSF) </li>
+              <li>Código fonte da aplicação Java</li>
+              <li>Scripts de execução</li>
+              <li>Arquivos executáveis das aplicações em Contiki, TinyOS e Java.</li>
+            </ul> 
+          </p>
+          <h2 id="instale_testbed">Instale seu próprio Testbed</h2>
+          <br />
+          <a href="data/manual_instalacao.pdf" download><b>Download Manual.pdf</b></a>
+          <br />
+          <!--<h2 id="section4">Aplicações de Monitoramento</h2>
+          <p>
+            ?
+          </p>-->
+          <hr>
+        </div><!-- /.col-xs-12 main -->
+      </div><!--/.row-->
+    </div><!--/.container-->
+  </div><!--/.page-container-->
+  <div id="footer"><!--footer-->
+    <div class="container">
+      <div class="row">
+        © 2015 GT-TeI <!-- <a href="contato.html">Contato</a>-->
+      </div><!--/row-->
+    </div><!--/container-->
+  </div><!--/footer-->
+  <!-- script references -->
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.2/jquery.min.js"></script>
+  <script src="js/bootstrap.min.js"></script>
+  <script src="js/scripts.js"></script>
+</body>
+</html>

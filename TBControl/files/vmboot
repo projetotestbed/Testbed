@@ -1,0 +1,38 @@
+#!/bin/bash
+### BEGIN INIT INFO
+# Provides:       vmboot
+# Required-Start: vboxdrv
+# Required-Stop:
+# Default-Start:  2 3 4 5
+# Default-Stop:   0 1 6
+# Short-Description: Stop/Start VMs on System shutdown
+### END INIT INFO
+
+VBOXUSER=tbdev
+SU="sudo -H -u $VBOXUSER"
+VBOXMANAGE=/usr/bin/VBoxManage
+VBOXHEADLESS=/usr/bin/VBoxHeadless
+RUNNINGVMS=$($SU $VBOXMANAGE --nologo list runningvms | sed -e 's/^".*".*{\(.*\)}/\1/')
+ALLVMS=$($SU $VBOXMANAGE --nologo list vms | sed -e 's/^".*".*{\(.*\)}/\1/')
+
+case $1 in
+stop)
+if [[ -n $RUNNINGVMS ]]; then
+echo "Saving the state of all running VMs..."
+for v in $RUNNINGVMS; do
+    $SU $VBOXMANAGE --nologo controlvm $v savestate
+done
+fi
+;;
+start)
+for v in $ALLVMS; do
+if [[ -n $($SU $VBOXMANAGE --nologo showvminfo $v | grep saved) ]]; then
+    echo "Restoring VMs..." && $SU $VBOXHEADLESS -s $v & > /dev/null
+fi
+done
+;;
+*)
+echo "Usage: /etc/init.d/vmboot start | stop"; exit 1
+;;
+esac
+exit 0
