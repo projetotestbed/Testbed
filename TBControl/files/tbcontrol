@@ -44,7 +44,7 @@ start)
 restart)
 	echo "* Restarting TBControl"
 	do_stop
-	sleep 10
+	sleep 5
 	do_start
 ;;
 *)

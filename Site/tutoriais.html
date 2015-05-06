@@ -36,6 +36,9 @@
            <li class="active">
              <a href="tutoriais.html">Tutoriais</a>
            </li>
+	       <li>
+             <a href="avaliacaoTestbed.html">Avaliação do Testbed</a>
+           </li>
            <li>
              <a href="contato.html">Contato</a>
            </li>
@@ -75,7 +78,7 @@
         <div class="col-xs-6 col-sm-3 sidebar-offcanvas" id="sidebar" role="navigation">
           <div data-spy="affix" data-offset-top="45" data-offset-bottom="90">
             <ul class="nav" id="sidebar-nav">
-              <li><a href="#configuracao">Configuração e Realização de Experimentos</a></li>
+              <li><a href="#configuracao">Configuração e Realização de Experimentos Básicos</a></li>
               <li><a href="#aplicacoes">Exemplos de Aplicações</a></li>
                 <!--<ul>
                   <li><a href="#section3">Monitoramento de Água</a></li>
@@ -93,14 +96,29 @@
         </div>
         <!-- main area -->
         <div class="col-xs-12 col-sm-9" data-spy="scroll" data-target="#sidebar-nav">
-          <h2 id="configuracao">Configuração e Realização de Experimentos</h2>
+          <h2 id="configuracao">Configuração e Realização de Experimentos Básicos</h2>
           <p>
             Para testar a configuração e realização de experimentos no testbed
-            faça download do tutorial para as aplicações TestSerial, 
-            TestPromiscuous e BlinkToRadio. Essas aplicações já vêm 
+            faça download das tarefas para as aplicações Blink e TestSerial. Essas aplicações já vêm 
             distribuídas com o TinyOS.<br /><br />
-            <a href="data/conf_exec.pdf" download><b>Download Tutorial.pdf</b></a>
+
+	    <h4 id="licao_1"><b>Lição 1</b></h4>
+				<p>
+				Para mostrar como executar uma aplicação básica no testbed CéuNaTerra, usaremos a
+				aplicação Blink disponibilizada junto com o TinyOS.
+				</p>
+            	<a href="data/licao_1.pdf" download><b>Download Liçao1.pdf</b></a>
+          
+	    <h4 id="licao_2"><b>Lição 2</b></h4>
+				<p>
+				Para mostrar como executar uma aplicação no testbed CéuNaTerra e receber o log da
+				execução na máquina do usuário, usaremos a aplicação TestSerial disponibilizada
+				junto com o TinyOS.
+				</p>
+            	<a href="data/licao_2.pdf" download><b>Download Liçao2.pdf</b></a>
+          
           </p>
+
           <h2 id="aplicacoes">Exemplos de Aplicações</h2>
           <h4 id="monitoramento_agua"><b>Monitoramento de Água</b></h4>
           <p>
@@ -130,13 +148,13 @@
             que executa no gateway foi desenvolvida em Java.
           </p>
           <p>
-            <br />
+	    <br />
+            <h4><i>Código Fonte</i></h4>
             <b><a href="data/WaterMonitor.zip" download>Download WaterMonitor.zip</a></b>
             <br />
             <br />
             Este arquivo contém:
             <ul>
-              <li>Manual de Instalação/Execução</li>
               <li>Arquivos de configuração</li>
               <li>Código fonte da aplicação Contiki e TinyOS (que será 
               executada na RSSF)</li>
@@ -144,8 +162,12 @@
               gateway para processamento dos dados)</li>
               <li>Scripts de execução</li>
               <li>Arquivos executáveis das aplicações em Contiki, TinyOS e Java.</li>
-            </ul> 
+            </ul>
+	    <br />
+	    <h4><i>Roteiro para execução no Testbed</i></h4>
+	    <b><a href="data/manual_WaterMonitor.pdf" download>Download RoteiroWaterMonitor.pdf</a></b>
           </p>
+	  <br />
           <h4 id="casa_inteligente"><b>Casa Inteligente</b></h4>  
           <p>
             No conceito de casas inteligentes, os equipamentos 
@@ -198,18 +220,21 @@
           </p> 
           <p>
             <br />
+	    <h4><i>Código Fonte</i></h4>
             <b><a href="data/SmartHome.zip" download>Download SmartHome.zip</a></b>
             <br />
             <br />
             Este arquivo contém:
             <ul>
-              <li>Manual de Instalação/Execução</li>
               <li>Arquivos de configuração</li>
               <li>Código fonte da aplicação Contiki e TinyOS (que será executada na RSSF) </li>
               <li>Código fonte da aplicação Java</li>
               <li>Scripts de execução</li>
               <li>Arquivos executáveis das aplicações em Contiki, TinyOS e Java.</li>
-            </ul> 
+            </ul>
+	    <br />
+	    <h4><i>Roteiro para execução no Testbed</i></h4>
+	    <b><a href="data/manual_SmartHome.pdf" download>Download RoteiroSmartHome.pdf</a></b> 
           </p>
           <h2 id="instale_testbed">Instale seu próprio Testbed</h2>
           <br />
