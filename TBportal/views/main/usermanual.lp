@@ -1,3 +1,129 @@
+	<style type="text/css" media="screen">
+
+		.tree ul {
+			margin: 0; padding: 0;
+			padding-top: 20px; position: relative;
+	
+			-webkit-transition: all 0.5s;
+			-moz-transition: all 0.5s;
+			transition: all 0.5s;
+		}
+
+		.tree li {
+			float: left; text-align: center;
+			list-style-type: none;
+			position: relative;
+			padding: 20px 5px 0 5px;
+	
+			-webkit-transition: all 0.5s;
+			-moz-transition: all 0.5s;
+			transition: all 0.5s;
+		}
+
+		/*We will use ::before and ::after to draw the connectors*/
+
+		.tree li::before, .tree li::after{
+			content: '';
+			position: absolute; top: 0; right: 50%;
+			border-top: 1px solid #ccc;
+			width: 50%; height: 45px;
+			z-index: -1;
+		}
+		.tree li::after{
+			right: auto; left: 50%;
+			border-left: 1px solid #ccc;
+		}
+
+		/*We need to remove left-right connectors from elements without 
+		any siblings*/
+		.tree li:only-child::after, .tree li:only-child::before {
+			display: none;
+		}
+
+		/*Remove space from the top of single children*/
+		.tree li:only-child{ padding-top: 0;}
+
+		/*Remove left connector from first child and 
+		right connector from last child*/
+		.tree li:first-child::before, .tree li:last-child::after{
+			border: 0 none;
+		}
+		/*Adding back the vertical connector to the last nodes*/
+		.tree li:last-child::before{
+			border-right: 1px solid #ccc;
+			border-radius: 0 5px 0 0;
+			
+			-webkit-transform: translateX(1px);
+			-moz-transform: translateX(1px);
+			transform: translateX(1px);
+			
+			-webkit-border-radius: 0 5px 0 0;
+			-moz-border-radius: 0 5px 0 0;
+			border-radius: 0 5px 0 0;
+		}
+		.tree li:first-child::after{
+			border-radius: 5px 0 0 0;
+			-webkit-border-radius: 5px 0 0 0;
+			-moz-border-radius: 5px 0 0 0;
+		}
+
+		/*Time to add downward connectors from parents*/
+		.tree ul ul::before{
+			content: '';
+			position: absolute; top: -12px; left: 50%;
+			border-left: 1px solid #ccc;
+			width: 0; height: 32px;
+			z-index: -1;
+		}
+
+		.tree li a{
+			border: 1px solid #ccc;
+			padding: 5px 10px;
+			text-decoration: none;
+			color: #666;
+			font-family: arial, verdana, tahoma;
+			font-size: 12px;
+			display: inline-block;
+			background: white;
+	
+			-webkit-border-radius: 5px;
+			-moz-border-radius: 5px;
+			border-radius: 5px;
+	
+			-webkit-transition: all 0.5s;
+			-moz-transition: all 0.5s;
+			transition: all 0.5s;
+		}
+		.tree li a+a {
+			margin-left: 20px;
+			position: relative;
+		}
+		.tree li a+a::before {
+			content: '';
+			position: absolute;
+			border-top: 1px solid #ccc;
+			top: 50%; left: -21px; 
+			width: 20px;
+		}
+
+		/*Time for some hover effects*/
+		/*We will apply the hover effect the the lineage of the element also*/
+		.tree li a:hover, .tree li a:hover~ul li a {
+			background: #ccc; color: #000; border: 1px solid #94a0b4;
+		}
+		/*Connector styles on hover*/
+		.tree li a:hover~ul li::after, 
+		.tree li a:hover~ul li::before, 
+		.tree li a:hover~ul::before, 
+		.tree li a:hover~ul ul::before
+		{
+			border-color: #94a0b4;
+		}
+	</style>
+	
+	
+
+
     <div id="masthead">  
       <div class="container">
         <div class="row">
@@ -18,7 +144,6 @@
               <li><a href="#introducao">Introdução</a></li>
               <li><a href="#operacao">Operação</a>
                 <ul>
-              	  <li><a href="#navega">Menu geral</a></li>
               	  <li><a href="#upload">Arquivos</a></li>
 	              <li><a href="#confnet">Configurando a rede</a></li>
 	              <li><a href="#script">Passos de execução</a></li>
@@ -28,19 +153,6 @@
 	              <li><a href="#log">Monitoramento</a></li>             
 	            </ul>
 			  </li>
-              <li><a href="#consultas">Consultas</a>
-                <ul >
-              	  <li><a href="#hierarquia">Hierarquia</a></li>
-              	  <li><a href="#dependencias">Dependências</a></li>
-	            </ul>
-			  </li>
-              <li><a href="#personalizacao">Personalização</a>
-                <ul >
-              	  <li><a href="#senha">Alterar Senha</a></li>
-              	  <li><a href="#attrdefaults">Configuração padrão</a></li>
-              	  <li><a href="#perfil">Alterar perfil</a></li>
-	            </ul>
-			  </li>
             </ul>
            </div>
         </div>
@@ -48,13 +160,23 @@
         <div class="col-xs-12 col-sm-9" data-spy="scroll" data-target="#sidebar-nav">
           <h2 id="introducao">Introdução</h2>
 			<p>
-				Akhds  asljkd ljad lkjadslkj asdljkasdd al. Akhds  asljkd ljad lkjadslkj asdljkasdd al. 
-				Akhds  asljkd ljad lkjadslkj asdljkasdd al. Akhds  asljkd ljad lkjadslkj asdljkasdd al. 
-				Akhds  asljkd ljad lkjadslkj asdljkasdd al. Akhds  asljkd ljad lkjadslkj asdljkasdd al. 
-				Akhds  asljkd ljad lkjadslkj asdljkasdd al. Akhds  asljkd ljad lkjadslkj asdljkasdd al. 
-				Akhds  asljkd ljad lkjadslkj asdljkasdd al. Akhds  asljkd ljad lkjadslkj asdljkasdd al. 
+				O Testbed Céu na Terra disponibiliza, para acesso remoto, uma ou mais redes de
+				sensores sem fio para execução de aplicações de usuários cadastrados.
+				Uma Rede de Sensores Sem Fio (RSSF) contém um conjunto de dispositivos 
+				compostos por um microcontrolador, um rádio para comunicação de dados e 
+				alguns sensores e/ou atuadores.				
 			</p>      
-			<table class="table" style="table-layout: auto; width:auto">
+			<p>
+				O principio de operação básico do Testbed assume que o usuário desenvolva toda
+				a aplicação em ambiente local, utilizando as ferramentas de desenvolvimento 
+				preferidas, e somente carregue no testbed (<em>upload</em>) os arquivos 
+				previamente compilados (<em>arquivos binários/executáveis</em>) para 
+				cada tipo de dispositivo (<em>tipo de mote</em>) da rede.     
+			</p>      
+			<p>
+				A tabela a seguir mostra a configuração de cada rede disponível nesse Testbed.      
+			</p>      
+			<table class="table" style="table-layout: auto; width:auto;">
 				<tr><th>Rede</th><th >Quant.</th><th>Tipo de mote</th></tr>
 				<% for netid,net in pairs(netsinfo) do %>
 					<tr><td><%=net.name%></td>
@@ -71,21 +193,83 @@
 				<% end %>
 			</table>
 
-          <hr>
-          <h2 id="operacao">Operação</h2>
-	          <h3 id="navega">Navegação no menu geral</h3>
-				<p>
-					Akhds  asljkd ljad lkjadslkj asdljkasdd al. Akhds  asljkd ljad lkjadslkj asdljkasdd al. 
-					Akhds  asljkd ljad lkjadslkj asdljkasdd al. Akhds  asljkd ljad lkjadslkj asdljkasdd al. 
-					Akhds  asljkd ljad lkjadslkj asdljkasdd al. Akhds  asljkd ljad lkjadslkj asdljkasdd al. 
-					Akhds  asljkd ljad lkjadslkj asdljkasdd al. Akhds  asljkd ljad lkjadslkj asdljkasdd al. 
-					Akhds  asljkd ljad lkjadslkj asdljkasdd al. Akhds  asljkd ljad lkjadslkj asdljkasdd al. 
-				</p>
+			<p>
+				Para executar um <b>Teste</b> no testbed, o usuário deve seguir um roteiro onde se define a execução
+				de um testes em vários itens de configurações.
+			</p>
 
-	          <h3 id="upload">Carregando seus arquivos binários</h3>
-	          	<div class="row">
-           		 <div class="col-md-10" align="center">
-                  	<img src="img/novo_exec.png" alt="Error: Picture missing." style="width: 40%; height: 50%">
+			<div style="float: right; padding-left: 10px;">
+			<div style="float: right; padding-top: 10px; padding-left: 10px; padding-right: 10px; border: 1px solid #ccc; border-radius: 5px;">
+				<div class="tree"  >
+					Hierarquia da Configurações de um Teste
+					<ul>
+						<li>
+							<a href="#" title="Define a execução de um teste."><i class='fa fa-rocket' style='color:DarkBlue'></i> Teste</a>
+							<ul>
+								<li>
+									<a href="#" title="Reserva de uma janela de execução."><i class='fa fa-calendar'  style='color:Green'></i> Agenda</a>
+								</li>
+								<li>
+									<a href="#" title="Define a configuração do teste."><i class='fa fa-cogs'  style='color:SaddleBrown '></i> Plano</a>
+									<ul>
+										<li>
+											<a href="#" title="Define os passos de execução."><i class='fa fa-list'  style='color:Purple '></i> Script</a>
+										</li>
+										<li>
+											<a href="#" title="Configuração dos Nós da Rede x Arquivos Executáveis."><i class='fa fa-star-o'  style='color:GoldenRod '></i> Config.Rede</a>
+											<ul>
+												<li>
+													<a href="#" title="Repositório dos arquivos executáveis."><i class='fa fa-files-o'  style='color:red'></i> Executáveis</a>
+												</li>
+											</ul>
+										</li>
+									
+									</ul>
+								</li>
+							</ul>
+						</li>
+					</ul>
+				</div>
+			</div> 
+			</div> 
+			<p>
+				A imagem ao lado mostra a hierarquia dos componentes de um teste.
+				A principal regra do Testbed é que dois testes não podem ser executados ao mesmo tempo na mesma 
+				rede. Essa regra exige que cada rede tenha uma agenda própria onde os usuários devem reservar
+				o horário que deseja executar o seu teste.
+			</p>      
+			<p>
+				Então um Teste só será executado se tiver uma <b>Agenda</b> e um <b>Plano</b> de teste associados.
+			</p>
+			<p>
+				Um <b>Plano</b> de teste é composto por uma <b>Configuração de Rede</b> e um <b>Script de Teste</b>.
+				No Script de Teste o usuário deve definir a sequência em que os nós da rede devem ser ativados 
+				e/ou desativados. Na Configuração de Rede o usuário seleciona quais nós participarão do seu teste
+				e qual arquivo executável cada nó utilizará. 
+			</p>
+			<p>
+				A configuração dos <b>Executáveis</b> permite a transferência (upload) dos arquivos binário/executáveis
+				da máquina local do usuáro para a área do usuário no Testbed.
+			</p>      
+			<p>
+				Com exceção das Agendas vencidas e dos Testes, qualquer outro item de configuração pode ser 
+				reutilizado em novas configurações.
+				Qualquer atualização efetuada em um item de configuração será refletida na execução do Teste que 
+				tenha o respectivo item na sua hieraquia.
+				Um Teste será reiniciado imediatamente se o mesmo estiver em execução no momento da atualização de um item. 
+			</p>
+			<p>
+				Um tutorial de uso com exemplos básicos pode ser encontrado logo no início da página
+				<a href="../Site/tutoriais.html" target="_blank">Tutoriais</a> do portal do projeto. 
+			</p>
+
+
+          <hr style="clear: both;">
+          <h2 id="operacao">Operação</h2>
+	          <h3 id="upload" style="clear: both;">Carregando seus arquivos binários</h3>
+	          	<div >
+           		 <div  style="float: right;">
+                  	<img src="img/novo_exec.png" alt="Error: Picture missing." >
             	 </div>
           		</div>
           		<br></br>
@@ -93,27 +277,46 @@
 					Localização: Configurações ><a href="http://testbed.inf.puc-rio.br/TBportal/?r=main/arquivo"> Novo Executável</a>
 				</p>
 				<p>
-					Esse formulário permite que você faça upload dos arquivos executáveis que você deseja usar no testbed para a nossa base da dados. Clique em "browse" para procurar o arquivo e não esqueça de checar o tipo do nó!
-					A descrição não é obrigatória, mas pode ajudar a distinguir arquivos de nomes iguais. 
+					Esse formulário permite que o usuário faça upload dos arquivos executáveis que deseja 
+					usar no testbed. Esses arquivos são armazenados na área do usuário e podem ser utilizados
+					em qualquer nó rede do Testbed.
+					Clique em "browse" para procurar um arquivo na máquina local e não esqueça de selecionar o 
+					tipo correto de mote. Após o upload não é mais possível alterar o tipo de mote de um arquivo.
+					A descrição não é obrigatória. 
 				</p>
-	          <h3 id="confnet">Configurando a rede de teste</h3>
+	          <h3 id="confnet" style="clear: both;">Configurando a rede de teste</h3>
+          		<p>
+					Localização: Configurações > <a href="http://testbed.inf.puc-rio.br/TBportal/?r=main/netconfig">Nova Configuração de Rede</a> 
+				</p>
+				<p>
+					É nessa tela que o usuário deve configurar os nós que serão utilizados em um teste.
+					Para cada nó da rede o usuário deverá indicar o identificador numérico do nó (ID lógico),
+					indicar se o nó será selecionado para o teste ("Usar mote?") e também indicar qual arquivo 
+					binário (executável) o nó utilizará.
+					Para a seleção do arquivo executável, pode-se optar por um arquivo default ou selecionar 
+					um arquivo específico.
+					No caso da seleção de arquivo default, o nó será carregado com o arquivo default configurado 
+					para o seu respectivo tipo no formulário da esquerda.
+					No topo da lista de nós existem dois chekbox ("<i class="fa fa-arrow-left" style="color:Gray"></i> marcar todos") 
+					que servem para marcar ou desmarcar todos os itens da lista, tanto para a seleção dos nós como para arquivo default.
+				</p>
+
 	          	<div class="row">
            		 <div class="col-md-10" align="center">
                   	<img src="img/novo_config_rede.png" alt="Error: Picture missing." style="width: 125%; height: 125%">
             	 </div>
           		</div>
           		<br></br>
-          		<p>
-					Localização: Configurações > <a href="http://testbed.inf.puc-rio.br/TBportal/?r=main/netconfig">Nova Configuração de Rede</a> 
+				<p>
+					Na lista de nós também é exibido o respectivo tipo de mote e a porta TCP/IP para conexão ao 
+					canal de dados (interface USB) do nó. 
 				</p>
 				<p>
-					Akhds  asljkd ljad lkjadslkj asdljkasdd al. Akhds  asljkd ljad lkjadslkj asdljkasdd al. 
-					Akhds  asljkd ljad lkjadslkj asdljkasdd al. Akhds  asljkd ljad lkjadslkj asdljkasdd al. 
-					Akhds  asljkd ljad lkjadslkj asdljkasdd al. Akhds  asljkd ljad lkjadslkj asdljkasdd al. 
-					Akhds  asljkd ljad lkjadslkj asdljkasdd al. Akhds  asljkd ljad lkjadslkj asdljkasdd al. 
-					Akhds  asljkd ljad lkjadslkj asdljkasdd al. Akhds  asljkd ljad lkjadslkj asdljkasdd al. 
+					Essa tela também informa na janela inferior esquerda a organização dos nós na rede, indicando, 
+					quando for o caso, se o nó está temporariamente inativo.
+ 
 				</p>
-	          <h3 id="script">Configurando um roteiro de execução</h3>
+	          <h3 id="script" style="clear: both;">Configurando um roteiro de execução</h3>
 	          	<div class="row">
            		 <div class="col-md-10" align="center">
                   	<img src="img/novo_script.png" alt="Error: Picture missing." style="width: 115%; height: 115%">
@@ -130,7 +333,7 @@
 					Akhds  asljkd ljad lkjadslkj asdljkasdd al. Akhds  asljkd ljad lkjadslkj asdljkasdd al. 
 					Akhds  asljkd ljad lkjadslkj asdljkasdd al. Akhds  asljkd ljad lkjadslkj asdljkasdd al. 
 				</p>
-	          <h3 id="planos">Configurando um plano de teste</h3>
+	          <h3 id="planos" style="clear: both;">Configurando um plano de teste</h3>
 	          	<div class="row">
            		 <div class="col-md-10" align="center">
                   	<img src="img/novo_plano.png" alt="Error: Picture missing." style="width: 50%; height: 50%">
@@ -147,7 +350,7 @@
 					Akhds  asljkd ljad lkjadslkj asdljkasdd al. Akhds  asljkd ljad lkjadslkj asdljkasdd al. 
 					Akhds  asljkd ljad lkjadslkj asdljkasdd al. Akhds  asljkd ljad lkjadslkj asdljkasdd al. 
 				</p>
-	          <h3 id="agenda">Agendando um horário para o teste</h3>
+	          <h3 id="agenda" style="clear: both;">Agendando um horário para o teste</h3>
 	          	<div class="row">
            		 <div class="col-md-10" align="center">
                   	<img src="img/agenda.png" alt="Error: Picture missing.">
@@ -164,7 +367,7 @@
 					Akhds  asljkd ljad lkjadslkj asdljkasdd al. Akhds  asljkd ljad lkjadslkj asdljkasdd al. 
 					Akhds  asljkd ljad lkjadslkj asdljkasdd al. Akhds  asljkd ljad lkjadslkj asdljkasdd al. 
 				</p>
-	          <h3 id="teste">Definindo a execução do teste</h3>
+	          <h3 id="teste" style="clear: both;">Definindo a execução do teste</h3>
 	          	<div class="row">
            		 <div class="col-md-10" align="center">
                   	<img src="img/novo_teste.png" alt="Error: Picture missing." style="width: 50%; height: 50%">
@@ -181,7 +384,13 @@
 					Akhds  asljkd ljad lkjadslkj asdljkasdd al. Akhds  asljkd ljad lkjadslkj asdljkasdd al. 
 					Akhds  asljkd ljad lkjadslkj asdljkasdd al. Akhds  asljkd ljad lkjadslkj asdljkasdd al. 
 				</p>
-	          <h3 id="log">Monitoramento</h3>
+	          <h3 id="log" style="clear: both;">Monitoramento</h3>
+	          	<div class="row">
+           		 <div class="col-md-10" align="center">
+                  	<img src="img/monitoracao.png" alt="Error: Picture missing." style="width: 100%; height: 100%">
+            	 </div>
+          		</div>
+          		<br></br>
 	          	<p>
 					Localização: <a href="http://testbed.inf.puc-rio.br/TBportal/?r=main/test_monitor">Monitoramento</a>
 				</p>
@@ -191,85 +400,6 @@
 					Akhds  asljkd ljad lkjadslkj asdljkasdd al. Akhds  asljkd ljad lkjadslkj asdljkasdd al. 
 					Akhds  asljkd ljad lkjadslkj asdljkasdd al. Akhds  asljkd ljad lkjadslkj asdljkasdd al. 
 					Akhds  asljkd ljad lkjadslkj asdljkasdd al. Akhds  asljkd ljad lkjadslkj asdljkasdd al. 
-				</p>
-          <hr>
-          <h2 id="consultas">Consultas</h2>
-	          <h3 id="hierarquia">Hierarquia</h3>
-	          	<div class="row">
-           		 <div class="col-md-10" align="center">
-                  	<img src="img/hierarquia.png" alt="Error: Picture missing.">
-            	 </div>
-          		</div>
-          		<br></br>
-          		<p>
-					Localização: Consultas > <a href="http://testbed.inf.puc-rio.br/TBportal/?r=main/cons_hierq_dep">Hierarquia/Dependência</a>
-				</p>
-				<p>
-					Akhds  asljkd ljad lkjadslkj asdljkasdd al. Akhds  asljkd ljad lkjadslkj asdljkasdd al. 
-					Akhds  asljkd ljad lkjadslkj asdljkasdd al. Akhds  asljkd ljad lkjadslkj asdljkasdd al. 
-					Akhds  asljkd ljad lkjadslkj asdljkasdd al. Akhds  asljkd ljad lkjadslkj asdljkasdd al. 
-					Akhds  asljkd ljad lkjadslkj asdljkasdd al. Akhds  asljkd ljad lkjadslkj asdljkasdd al. 
-					Akhds  asljkd ljad lkjadslkj asdljkasdd al. Akhds  asljkd ljad lkjadslkj asdljkasdd al. 
-				</p>
-	          <h3 id="dependencias">Dependências</h3>
-	          	<div class="row">
-           		 <div class="col-md-10" align="center">
-                  	<img src="img/dependencia.png" alt="Error: Picture missing.">
-            	 </div>
-          		</div>
-          		<br></br>
-          		<p>
-					Localização: Consultas > <a href="http://testbed.inf.puc-rio.br/TBportal/?r=main/cons_hierq_dep">Hierarquia/Dependência</a>
-				</p>
-				<p>
-					Akhds  asljkd ljad lkjadslkj asdljkasdd al. Akhds  asljkd ljad lkjadslkj asdljkasdd al. 
-					Akhds  asljkd ljad lkjadslkj asdljkasdd al. Akhds  asljkd ljad lkjadslkj asdljkasdd al. 
-					Akhds  asljkd ljad lkjadslkj asdljkasdd al. Akhds  asljkd ljad lkjadslkj asdljkasdd al. 
-					Akhds  asljkd ljad lkjadslkj asdljkasdd al. Akhds  asljkd ljad lkjadslkj asdljkasdd al. 
-					Akhds  asljkd ljad lkjadslkj asdljkasdd al. Akhds  asljkd ljad lkjadslkj asdljkasdd al. 
-				</p>
-          <hr>
-          <h2 id="personalizacao">Personalização</h2>
-	          <h3 id="senha">Alterar Senha</h3>
-	          	<div class="row">
-           		 <div class="col-md-10" align="center">
-                  	<img src="img/alterar_senha.png" alt="Error: Picture missing.">
-            	 </div>
-          		</div>
-          		<br></br>
-          		<p>
-					Localização: Username > <a href="http://testbed.inf.puc-rio.br/TBportal/?r=main/userconfig">Configurações</a>
-				</p>
-				<p>
-					Formulário para alteração de senha. 
-				</p>
-	          <h3 id="attrdefaults">Configuração padrão</h3>
-	          	<div class="row">
-           		 <div class="col-md-10" align="center">
-                  	<img src="img/config_default.png" alt="Error: Picture missing." style="width: 35%; height: 35%">
-            	 </div>
-          		</div>
-          		<br></br>
-          		<p>
-					Localização: Username > <a href="http://testbed.inf.puc-rio.br/TBportal/?r=main/userconfig">Configurações</a>
-				</p>
-				<p>
-					Esse formulário permite "personalizar" a tela inicial da sua sessão(visão geral). Qual perfil você quer que seja o default e como a sua visão geral deve ser.
-					Todos esses parâmetros podem ser alterados durante a sessão, mas essa configuração indica a default.
-				</p>
-	          <h3 id="perfil">Alterar perfil da sessão atual</h3>
-	          	<div class="row">
-           		 <div class="col-md-10" align="center">
-                  	<img src="img/alterar_perfil.png" alt="Error: Picture missing.">
-            	 </div>
-          		</div>
-          		<br></br>
-          		<p>
-					Localização: Username > <a href="http://testbed.inf.puc-rio.br/TBportal/?r=main/userconfig">Configurações</a>
-				</p>
-				<p>
-					Esse formulário permite com que você mude o seu perfil ATUAL da sessão. Essa mudança não será persistente para outra sessão.
-					(Apenas disponível para usuários com mais de um perfil cadastrado)
 				</p>
           <hr>
         </div><!-- /.col-xs-12 main -->

@@ -1004,7 +1004,7 @@ end
 
 function getD_netconfig (con,session,fileid)
   local netconfig = {}
-  local cur = con:execute(string.format("SELECT DISTINCT ntc.netconfigid as netid, ntc.cname as name,to_char(ntc.created,'DD/MM/YY HH24:MI:SS') as date FROM netconfig as ntc, netconfignodes as ncn WHERE ntc.uid=%d and ntc.netconfigid = ncn.netconfigid and ncn.fileid=%d",session.uid,fileid))
+  local cur = con:execute(string.format("SELECT DISTINCT ntc.netconfigid as netid, ntc.cname as name,to_char(ntc.created,'DD/MM/YY HH24:MI:SS') as date  FROM netconfig as ntc, netconfignodes as ncn, netconfigdefaultfiles as ncdf WHERE (ntc.uid=%d and ntc.netconfigid = ncn.netconfigid and ncn.fileid=%d) or (ntc.uid=%d and ntc.netconfigid = ncdf.netconfigid and ncdf.fileid=%d)",session.uid,fileid,session.uid,fileid))
   local row = cur:fetch({}, "a")
   while row do
     local name = {}    

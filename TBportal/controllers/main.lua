@@ -440,12 +440,12 @@ function main.arquivo(page)
     local POST
     local alert
 
-    if (page.r.method == 'POST') and not page.POST.bindata then -- retry parsebosy() if the first from Sailor fails.
+    if (page.r.method == 'POST') and page.POST.action == 'save' and not page.POST.bindata then -- retry parsebosy() if the first from Sailor fails.
         POST = page.r:parsebody(250000)
     else
         POST = page.POST
     end
-    if POST.bindata then
+    if POST.action then
         local par = POST
         local serverfile = os.tmpname ()
 --[[
@@ -479,7 +479,8 @@ end
           os.remove(serverfile)
         end
         if action=='update' and par.fileid ~= '0' then
-          update_userfiles(con,session,par.fileid, par.filename,par.description)
+          local stat = update_userfiles(con,session,par.fileid, par.filename,par.description)
+          if not stat then alert="Erro para atualizar arquivo! ".. par.filename end
         end
     else
       if next(page.GET) then
