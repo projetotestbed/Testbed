@@ -157,7 +157,7 @@
 	<div class="col" style="float: left; padding-top: 10px; padding-left: 10px; border: 1px solid #ccc; border-radius: 5px;">
 
 	<div class="tree" style="padding-right: 10px;" >
-		Hierarquia da Configurações de um Teste
+		Hierarquia da Configuração de um Teste
 		<ul>
 			<li>
 				<a href="#" title="Define a execução de um teste."><i class='fa fa-rocket' style='color:DarkBlue'></i> Teste</a>

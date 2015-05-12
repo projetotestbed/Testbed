@@ -146,7 +146,7 @@
                 <ul>
               	  <li><a href="#upload">Arquivos</a></li>
 	              <li><a href="#confnet">Configurando a rede</a></li>
-	              <li><a href="#script">Passos de execução</a></li>
+	              <li><a href="#script">Script de execução</a></li>
 	              <li><a href="#planos">Plano de teste</a></li>
 	              <li><a href="#agenda">Agendamento</a></li>             
 	              <li><a href="#teste">Teste</a></li>             
@@ -174,7 +174,7 @@
 				cada tipo de dispositivo (<em>tipo de mote</em>) da rede.     
 			</p>      
 			<p>
-				A tabela a seguir mostra a configuração de cada rede disponível nesse Testbed.      
+				A tabela a seguir mostra a configuração de cada rede disponível neste Testbed.      
 			</p>      
 			<table class="table" style="table-layout: auto; width:auto;">
 				<tr><th>Rede</th><th >Quant.</th><th>Tipo de mote</th></tr>
@@ -195,13 +195,13 @@
 
 			<p>
 				Para executar um <b>Teste</b> no testbed, o usuário deve seguir um roteiro onde se define a execução
-				de um testes em vários itens de configurações.
+				de um teste em vários itens de configurações.
 			</p>
 
 			<div style="float: right; padding-left: 10px;">
 			<div style="float: right; padding-top: 10px; padding-left: 10px; padding-right: 10px; border: 1px solid #ccc; border-radius: 5px;">
 				<div class="tree"  >
-					Hierarquia da Configurações de um Teste
+					Hierarquia da Configuração de um Teste
 					<ul>
 						<li>
 							<a href="#" title="Define a execução de um teste."><i class='fa fa-rocket' style='color:DarkBlue'></i> Teste</a>
@@ -259,6 +259,14 @@
 				Um Teste será reiniciado imediatamente se o mesmo estiver em execução no momento da atualização de um item. 
 			</p>
 			<p>
+				Durante a execução de um teste, o sistema permite acesso remoto, via portas TCP/IP, 
+				às portas seriais (USB) dos nós. 
+				Dessa forma, se o teste do usuário necessitar, é possível se comunicar com cada nó da rede durante 
+				a execução do teste.
+				Para controlar quem pode acessar essas portas durante um teste, o sistema permite que o usuário 
+				identifique o IP da sua máquina cliente (ou uma faixa de IPs) que terá permissão de acesso.
+			</p>
+			<p>
 				Um tutorial de uso com exemplos básicos pode ser encontrado logo no início da página
 				<a href="../Site/tutoriais.html" target="_blank">Tutoriais</a> do portal do projeto. 
 			</p>
@@ -266,7 +274,7 @@
 
           <hr style="clear: both;">
           <h2 id="operacao">Operação</h2>
-	          <h3 id="upload" style="clear: both;">Carregando seus arquivos binários</h3>
+	          <h3 id="upload" style="clear: both;">Carregando os arquivos binários</h3>
 	          	<div >
            		 <div  style="float: right;">
                   	<img src="img/novo_exec.png" alt="Error: Picture missing." >
@@ -277,7 +285,7 @@
 					Localização: Configurações ><a href="http://testbed.inf.puc-rio.br/TBportal/?r=main/arquivo"> Novo Executável</a>
 				</p>
 				<p>
-					Esse formulário permite que o usuário faça upload dos arquivos executáveis que deseja 
+					Este formulário permite que o usuário faça upload dos arquivos executáveis que deseja 
 					usar no testbed. Esses arquivos são armazenados na área do usuário e podem ser utilizados
 					em qualquer nó rede do Testbed.
 					Clique em "browse" para procurar um arquivo na máquina local e não esqueça de selecionar o 
@@ -291,9 +299,9 @@
 				<p>
 					É nessa tela que o usuário deve configurar os nós que serão utilizados em um teste.
 					Para cada nó da rede o usuário deverá indicar o identificador numérico do nó (ID lógico),
-					indicar se o nó será selecionado para o teste ("Usar mote?") e também indicar qual arquivo 
-					binário (executável) o nó utilizará.
-					Para a seleção do arquivo executável, pode-se optar por um arquivo default ou selecionar 
+					indicar se o nó será selecionado para o teste ("Usar mote?") e também indicar qual executável 
+					(arquivo binário) o nó utilizará.
+					Para seleção do arquivo executável, pode-se optar por um arquivo default ou selecionar 
 					um arquivo específico.
 					No caso da seleção de arquivo default, o nó será carregado com o arquivo default configurado 
 					para o seu respectivo tipo no formulário da esquerda.
@@ -316,90 +324,124 @@
 					quando for o caso, se o nó está temporariamente inativo.
  
 				</p>
-	          <h3 id="script" style="clear: both;">Configurando um roteiro de execução</h3>
-	          	<div class="row">
-           		 <div class="col-md-10" align="center">
-                  	<img src="img/novo_script.png" alt="Error: Picture missing." style="width: 115%; height: 115%">
-            	 </div>
-          		</div>
-          		<br></br>
+	          <h3 id="script" style="clear: both;">Configurando um Script de execução</h3>
           		<p>
 					Localização: Configurações > <a href="http://testbed.inf.puc-rio.br/TBportal/?r=main/script">Novo Script</a>
 				</p>
 				<p>
-					Akhds  asljkd ljad lkjadslkj asdljkasdd al. Akhds  asljkd ljad lkjadslkj asdljkasdd al. 
-					Akhds  asljkd ljad lkjadslkj asdljkasdd al. Akhds  asljkd ljad lkjadslkj asdljkasdd al. 
-					Akhds  asljkd ljad lkjadslkj asdljkasdd al. Akhds  asljkd ljad lkjadslkj asdljkasdd al. 
-					Akhds  asljkd ljad lkjadslkj asdljkasdd al. Akhds  asljkd ljad lkjadslkj asdljkasdd al. 
-					Akhds  asljkd ljad lkjadslkj asdljkasdd al. Akhds  asljkd ljad lkjadslkj asdljkasdd al. 
+					O Script de execução define a sequência que os nós de uma rede serão ativados e desativados 
+					durante o teste do usuário.
+					Um script é composto por uma lista de comandos do tipo <em>A</em>, <em>D</em> ou <em>W</em>.
+					Os comandos <em>A</em> de ativação e <em>D</em> desativação recebem um parâmetro que pode identificar
+					um nó, uma lista de nós ou uma faixa de nós. Esses comandos somentem atuam sobre os nós selecionados
+					na Configuração da Rede do respectivo Plano de Teste. Esses dois comandos consideram como 
+					identificador de nó o ID Físico do nó na rede.
+					O comando <em>W</em> de wait, suspende a execução do script por uma quantidade de segundos passada
+					como parâmetro.
+					Um script muito comum é composto somente pela comando "A ALL" que ativa, no início do Teste, 
+					todos os nós selecionados na respectiva Configuração da Rede.
 				</p>
-	          <h3 id="planos" style="clear: both;">Configurando um plano de teste</h3>
 	          	<div class="row">
            		 <div class="col-md-10" align="center">
-                  	<img src="img/novo_plano.png" alt="Error: Picture missing." style="width: 50%; height: 50%">
+                  	<img src="img/novo_script.png" alt="Error: Picture missing." style="width: 125%; height: 125%">
             	 </div>
           		</div>
           		<br></br>
-          		<p>
+				<p>
+					Um script sempre é iniciado a partir da sua primeira linha de comando. Quando um Teste é interrompido 
+					e reiniciado, o script também vai reiniciar da sua primeira linha.  
+					Um script é interrompido automaticamente ao final da agenda do respectivo Teste, independente da duração
+					do script. Por exemplo, considerando que o usuário configurou um script para executar durante 30 minutos 
+					em uma agenda de 30 minutos. Se o usuário reinciar o teste aos 15 minutos de execução, o script será 
+					re-executado somente até a metade do tempo original.    
+				</p>
+	          <h3 id="planos" style="clear: both;">Configurando um plano de teste</h3>
+	          	<div >
+           		 <div  style="float: right;">
+                  	<img src="img/novo_plano.png" alt="Error: Picture missing." >
+            	 </div>
+          		</div>
+          		<br></br>
+				<p>
 					Localização: Configurações > <a href="http://testbed.inf.puc-rio.br/TBportal/?r=main/teste">Novo Plano</a>
 				</p>
 				<p>
-					Akhds  asljkd ljad lkjadslkj asdljkasdd al. Akhds  asljkd ljad lkjadslkj asdljkasdd al. 
-					Akhds  asljkd ljad lkjadslkj asdljkasdd al. Akhds  asljkd ljad lkjadslkj asdljkasdd al. 
-					Akhds  asljkd ljad lkjadslkj asdljkasdd al. Akhds  asljkd ljad lkjadslkj asdljkasdd al. 
-					Akhds  asljkd ljad lkjadslkj asdljkasdd al. Akhds  asljkd ljad lkjadslkj asdljkasdd al. 
-					Akhds  asljkd ljad lkjadslkj asdljkasdd al. Akhds  asljkd ljad lkjadslkj asdljkasdd al. 
+					Este formulário permite que o usuário crie um Plano associando uma Configuração de Rede com 
+					um Script de Execução.
 				</p>
+
 	          <h3 id="agenda" style="clear: both;">Agendando um horário para o teste</h3>
+          		<p>
+					Localização: <a href="http://testbed.inf.puc-rio.br/TBportal/?r=main/agenda">Agenda</a>
+				</p>
+				<p>
+					A tela de Agendamento permite que o usuário reserve uma janela de tempo para execução do seu teste.
+					Cada Rede de Teste tem a sua própria agenda para evitar que mais de um usuário tente executar 
+					seus testes ao mesmo tempo.
+					Uma janela de execução tem duração mínima de 30 minutos e sempre tem seu valor multiplo de 30 minutos.
+					O primeiro click na agenda seleciona o slot inicial e os clicks subsequentes redefine o slot final.
+					O botão "Limpar slots" permite uma nova seleção para o slot inicial.
+					O formulário "Buscar novo período" permite alterar a faixa de datas da agenda.
+				</p>
 	          	<div class="row">
            		 <div class="col-md-10" align="center">
                   	<img src="img/agenda.png" alt="Error: Picture missing.">
             	 </div>
           		</div>
-          		<br></br>
-          		<p>
-					Localização: <a href="http://testbed.inf.puc-rio.br/TBportal/?r=main/agenda">Agenda</a>
-				</p>
-				<p>
-					Akhds  asljkd ljad lkjadslkj asdljkasdd al. Akhds  asljkd ljad lkjadslkj asdljkasdd al. 
-					Akhds  asljkd ljad lkjadslkj asdljkasdd al. Akhds  asljkd ljad lkjadslkj asdljkasdd al. 
-					Akhds  asljkd ljad lkjadslkj asdljkasdd al. Akhds  asljkd ljad lkjadslkj asdljkasdd al. 
-					Akhds  asljkd ljad lkjadslkj asdljkasdd al. Akhds  asljkd ljad lkjadslkj asdljkasdd al. 
-					Akhds  asljkd ljad lkjadslkj asdljkasdd al. Akhds  asljkd ljad lkjadslkj asdljkasdd al. 
-				</p>
+
 	          <h3 id="teste" style="clear: both;">Definindo a execução do teste</h3>
-	          	<div class="row">
-           		 <div class="col-md-10" align="center">
-                  	<img src="img/novo_teste.png" alt="Error: Picture missing." style="width: 50%; height: 50%">
+	          	<div >
+           		 <div  style="float: right;">
+                  	<img src="img/novo_teste.png" alt="Error: Picture missing.">
             	 </div>
           		</div>
           		<br></br>
-          		<p>
+				<p>
 					Localização: Configurações > <a href="http://testbed.inf.puc-rio.br/TBportal/?r=main/teste">Novo Teste</a>
 				</p>
 				<p>
-					Akhds  asljkd ljad lkjadslkj asdljkasdd al. Akhds  asljkd ljad lkjadslkj asdljkasdd al. 
-					Akhds  asljkd ljad lkjadslkj asdljkasdd al. Akhds  asljkd ljad lkjadslkj asdljkasdd al. 
-					Akhds  asljkd ljad lkjadslkj asdljkasdd al. Akhds  asljkd ljad lkjadslkj asdljkasdd al. 
-					Akhds  asljkd ljad lkjadslkj asdljkasdd al. Akhds  asljkd ljad lkjadslkj asdljkasdd al. 
-					Akhds  asljkd ljad lkjadslkj asdljkasdd al. Akhds  asljkd ljad lkjadslkj asdljkasdd al. 
+					A configuração de um Teste é a etapa final para confirmar a execução do mesmo.
+					Nessa tela o usuário associa um Plano de Teste à uma Agenda.
+					O Sistema de Controle do Testbed vai iniciar a execução do Teste na hora agendada.
+					Se a agenda for corrente, o Sistema de Controle inicia a execução imediatamente. 
 				</p>
+				<p>
+					É neste formulário que o usuário deve confirmar o endereço IP da sua máquina cliente ou definir
+					uma máscara IP para filtrar o acesso.
+					Para evitar dúvidas qual é o IP da máquina cliente, principalmente nas redes que utilizam 
+					servidores NAT, este formulário exibe qual é o IP real da máquina cliente.
+					A configuração do endereço IP também permite o uso de uma máscara 255 para facilitar o acesso de 
+					faixas de IPs de sub-redes. 
+					Por exemplo, a configuração hipotética 129.130.10.255 permite o acesso de todos computadores da
+					rede 129.130.10.xxx.
+					A configuração 255.255.255.255 libera o acesso de qualquer computador ao teste do usuário.
+				</p>
+
+
 	          <h3 id="log" style="clear: both;">Monitoramento</h3>
-	          	<div class="row">
-           		 <div class="col-md-10" align="center">
-                  	<img src="img/monitoracao.png" alt="Error: Picture missing." style="width: 100%; height: 100%">
-            	 </div>
-          		</div>
-          		<br></br>
 	          	<p>
 					Localização: <a href="http://testbed.inf.puc-rio.br/TBportal/?r=main/test_monitor">Monitoramento</a>
 				</p>
 				<p>
-					Akhds  asljkd ljad lkjadslkj asdljkasdd al. Akhds  asljkd ljad lkjadslkj asdljkasdd al. 
-					Akhds  asljkd ljad lkjadslkj asdljkasdd al. Akhds  asljkd ljad lkjadslkj asdljkasdd al. 
-					Akhds  asljkd ljad lkjadslkj asdljkasdd al. Akhds  asljkd ljad lkjadslkj asdljkasdd al. 
-					Akhds  asljkd ljad lkjadslkj asdljkasdd al. Akhds  asljkd ljad lkjadslkj asdljkasdd al. 
-					Akhds  asljkd ljad lkjadslkj asdljkasdd al. Akhds  asljkd ljad lkjadslkj asdljkasdd al. 
+					A tela de monitoramento permite que o usuário acompanhe a execução do seu teste com os 
+					seguintes tipos de logs:
+				</p>
+				<ul>
+					<li>Execução dos comandos do Script de Teste, indicando o momento de cada comando 
+					e o tempo de carga do código executável em cada nó.
+					<li>Mensagens de dados, no formato hexadecimal, trocadas entre os nós da rede e o computador 
+					cliente do usuário.
+					<li>Mensagens das conexões/desconexões TCP/IP, incluindo as tentativas com IP inválido.
+				</ul>
+	          	<div class="row">
+           		 <div class="col-md-10" align="center">
+                  	<img src="img/monitoracao.png" alt="Error: Picture missing." style="width: 125%; height: 125%">
+            	 </div>
+          		</div>
+          		<br></br>
+				<p>
+					Os dados da tela são atualizados automaticamente a cada segundo e só são exibidos para 
+					o teste do usuário que estiver em execução.
 				</p>
           <hr>
         </div><!-- /.col-xs-12 main -->
