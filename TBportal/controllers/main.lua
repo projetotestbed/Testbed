@@ -384,6 +384,8 @@ function main.viewlog(page)
   if not checkSession(page) then return end
   env,con = connect()
   local logdata={}
+  local logTable={}
+  local totalLines=0
   if next(page.POST) and page.POST.testid then
     logdata, logTable = get_log(con,session,page.POST.testid)
     close_connect(env,con)
@@ -409,7 +411,8 @@ function main.viewlog(page)
       local wdt2='150px'
       local wdt3='30px'
       local wdt4='60px'
-      logdata, logTable = get_log(con,session,page.GET.testid)
+      logdata, logTable, totalLines= get_log(con,session,page.GET.testid,3000)
+      if totalLines > 3000 then logdata.alert = "Arquivo muito grande. Recuperando somente 3000 linhas. Faça download para recuperar o total de ".. totalLines .." linhas." end
       logdata.data = ""
       for k,reg in pairs(logTable) do 
         local logtype=reg.logtype
@@ -475,7 +478,11 @@ end
           io.close(file)
           os.execute('chmod ugo+r '..serverfile)  
           local stat = insert_userfiles(con,session,par.nodetype,par.filename,par.description,serverfile)
-          if not stat then alert="Erro para salvar arquivo! ".. serverfile end
+          if not stat then 
+            alert="Erro para salvar arquivo! ".. serverfile 
+          else 
+            alert="Arquivo [".. par.filename .. "] armazenado com sucesso." 
+          end
           os.remove(serverfile)
         end
         if action=='update' and par.fileid ~= '0' then
@@ -1309,6 +1316,23 @@ end
           alert = "Falha ao inserir userconfig"
         else
           alert = "Usuário criado com sucesso!"
+          if page.POSTMULTI.enviarEmail and page.POSTMULTI.enviarEmail[1] then
+              -- send e-mail to new user
+              local sendTo = page.POSTMULTI.ulogin[1]
+              local body = "Oi ".. page.POSTMULTI.unameCreate[1] .. ","
+              body =  body .. "\n\nFoi criado acesso ao testbed ".. sailor.conf.portalAddr .. " para o seu e-mail ".. sendTo ..""
+              body = body .. "\nSenha atual: ".. page.POSTMULTI.password1[1]
+              body = body .. "\n"
+              body = body .. "\n Att,\n Testbed Admin"
+              body = body .. "\n\n Obs: Esse e-mail foi gerado automaticamente."
+              local stat2,err2 = sendEmail('ceunaterra.testbed', sendTo, 'Céu na Terra Testbed - novo usuário', body)
+              if not stat2 then
+                alert = alert .." Erro ao enviar e-mail!" .. " (" .. (err2 or "--") ..")" 
+                env,con = connect()
+                insert_syslog(con,session,'ERROR: mail to '.. sendTo .. ' (' .. (err2 or '--') ..')')
+                close_connect(env,con)
+              end
+          end
         end
         page:render('useradmin',{session=session,alert=alert ,roles=roles})
       else

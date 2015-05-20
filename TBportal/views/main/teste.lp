@@ -4,7 +4,7 @@
 
 <div style="padding-top: 10px;">
 <form method="post">
-	<div class="panel panel-default" style="float: left;">
+	<div class="panel panel-default" style="float: left; <%= (test and test.name and 'border-color: blue;') or '' %>">
 		<div class="panel-heading">
 	    	<h4><%= (test and test.name and 'Atualizar Teste') or 'Novo Teste' %></h4>
 			<%= (test and test.name and '(obs.: As alterações sobre-escrevem o teste original.)') or '' %>

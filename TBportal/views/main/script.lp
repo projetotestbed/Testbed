@@ -4,7 +4,7 @@
 
 <div class="col" style="padding-top: 10px;">
 	<form method="post">
-		<div class="panel panel-default" style="float: left;">
+		<div class="panel panel-default" style="float: left; <%= (script and script.name and 'border-color: blue;') or '' %>">
 			<div class="panel-heading">
 		    	<h4><%= (script and script.name and 'Atualizar Script') or 'Novo Script' %></h4>
 				<%= (script and script.name and '(obs.: As alterações sobre-escrevem o script original.)') or '' %>

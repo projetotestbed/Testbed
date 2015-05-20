@@ -4,7 +4,7 @@
 
 <div style="padding-top: 10px;">
 <form method="post" enctype="multipart/form-data">
-	<div class="panel panel-default" style="float: left;">
+	<div class="panel panel-default" style="float: left; <%= (userfile and userfile.filename and 'border-color: blue;') or '' %>">
 		<div class="panel-heading">
 	    	<h4><%= (userfile and userfile.filename and 'Atualizar Arquivo Executável') or 'Novo Arquivo Executável' %></h4>
 			<p align="left"><%= (userfile and userfile.filename and '(Somente nome e descrição)') or '' %></p>

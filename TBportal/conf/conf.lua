@@ -6,7 +6,8 @@ local conf = {
 		default_controller = 'main', 
 		default_action = 'index',
 		layout = 'default',
-		route_parameter = 'r'
+		route_parameter = 'r',
+    portalAddr = 'ceunaterra.voip.ufrj.br'
 	},
 	db = {
 		driver = 'postgres',
@@ -17,9 +18,10 @@ local conf = {
 	},
 	smtp = {
 		server = 'smtp.gmail.com',
-		user = 'suporte.testbed@gmail.com',
-		pass = 'tbdev2015',
-		from = 'suporte.testbed@gmail.com'
+    port = 465,
+		user = 'ceunaterra.testbed@gmail.com',
+		pass = 'projetotestbed',
+		from = 'ceunaterra.testbed@gmail.com'
 	}
 }
 

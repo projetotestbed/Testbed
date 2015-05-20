@@ -158,7 +158,7 @@
         </div>
         <!-- main area -->
         <div class="col-xs-12 col-sm-9" data-spy="scroll" data-target="#sidebar-nav">
-          <h2 id="introducao">Introdução</h2>
+          <h2 style="padding-top: 50px; margin-top: -50px;" id="introducao">Introdução</h2>
 			<p>
 				O Testbed Céu na Terra disponibiliza, para acesso remoto, uma ou mais redes de
 				sensores sem fio para execução de aplicações de usuários cadastrados.
@@ -273,11 +273,11 @@
 
 
           <hr style="clear: both;">
-          <h2 id="operacao">Operação</h2>
-	          <h3 id="upload" style="clear: both;">Carregando os arquivos binários</h3>
+          <h2  style="padding-top: 50px; margin-top: -50px;" id="operacao">Operação</h2>
+	          <h3  style="clear: both; padding-top: 50px; margin-top: -50px;" id="upload">Carregando os arquivos binários</h3>
 	          	<div >
            		 <div  style="float: right;">
-                  	<img src="img/novo_exec.png" alt="Error: Picture missing." >
+                  	<img src="img/novo_exec.png" alt="Error: Picture missing.">
             	 </div>
           		</div>
           		<br></br>
@@ -292,7 +292,7 @@
 					tipo correto de mote. Após o upload não é mais possível alterar o tipo de mote de um arquivo.
 					A descrição não é obrigatória. 
 				</p>
-	          <h3 id="confnet" style="clear: both;">Configurando a rede de teste</h3>
+	          <h3  style="clear: both; padding-top: 50px; margin-top: -50px;" id="confnet">Configurando a rede de teste</h3>
           		<p>
 					Localização: Configurações > <a href="http://testbed.inf.puc-rio.br/TBportal/?r=main/netconfig">Nova Configuração de Rede</a> 
 				</p>
@@ -324,7 +324,7 @@
 					quando for o caso, se o nó está temporariamente inativo.
  
 				</p>
-	          <h3 id="script" style="clear: both;">Configurando um Script de execução</h3>
+	          <h3  style="clear: both; padding-top: 50px; margin-top: -50px;" id="script">Configurando um Script de execução</h3>
           		<p>
 					Localização: Configurações > <a href="http://testbed.inf.puc-rio.br/TBportal/?r=main/script">Novo Script</a>
 				</p>
@@ -355,7 +355,7 @@
 					em uma agenda de 30 minutos. Se o usuário reinciar o teste aos 15 minutos de execução, o script será 
 					re-executado somente até a metade do tempo original.    
 				</p>
-	          <h3 id="planos" style="clear: both;">Configurando um plano de teste</h3>
+	          <h3  style="clear: both; padding-top: 50px; margin-top: -50px;" id="planos">Configurando um plano de teste</h3>
 	          	<div >
            		 <div  style="float: right;">
                   	<img src="img/novo_plano.png" alt="Error: Picture missing." >
@@ -370,7 +370,7 @@
 					um Script de Execução.
 				</p>
 
-	          <h3 id="agenda" style="clear: both;">Agendando um horário para o teste</h3>
+	          <h3  style="clear: both; padding-top: 50px; margin-top: -50px;" id="agenda">Agendando um horário para o teste</h3>
           		<p>
 					Localização: <a href="http://testbed.inf.puc-rio.br/TBportal/?r=main/agenda">Agenda</a>
 				</p>
@@ -385,11 +385,11 @@
 				</p>
 	          	<div class="row">
            		 <div class="col-md-10" align="center">
-                  	<img src="img/agenda.png" alt="Error: Picture missing.">
+                  	<img src="img/agenda.png" alt="Error: Picture missing."style="width: 125%; height: 125%">
             	 </div>
           		</div>
 
-	          <h3 id="teste" style="clear: both;">Definindo a execução do teste</h3>
+	          <h3  style="clear: both; padding-top: 50px; margin-top: -50px;" id="teste">Definindo a execução do teste</h3>
 	          	<div >
            		 <div  style="float: right;">
                   	<img src="img/novo_teste.png" alt="Error: Picture missing.">
@@ -418,7 +418,7 @@
 				</p>
 
 
-	          <h3 id="log" style="clear: both;">Monitoramento</h3>
+	          <h3  style="clear: both; padding-top: 50px; margin-top: -50px;" id="log">Monitoramento</h3>
 	          	<p>
 					Localização: <a href="http://testbed.inf.puc-rio.br/TBportal/?r=main/test_monitor">Monitoramento</a>
 				</p>

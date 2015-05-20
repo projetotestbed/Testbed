@@ -1,7 +1,7 @@
 
 <div style="padding-top: 10px;">
 <form method="post">
-	<div class="panel panel-default" style="float: left;">
+	<div class="panel panel-default" style="float: left; <%= (plan and plan.name and 'border-color: blue;') or '' %>">
 		<div class="panel-heading">
 	    	<h4><%= (plan and plan.name and 'Atualizar Plano') or 'Novo Plano' %></h4>
 			<%= (plan and plan.name and '(obs.: As alterações sobre-escrevem o plano original.)') or '' %>

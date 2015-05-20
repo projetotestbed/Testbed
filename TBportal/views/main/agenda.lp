@@ -7,7 +7,7 @@
 <table>
 <tr><td>
 	<form method="post">
-		<div class="panel panel-default" style="float: left;">
+		<div class="panel panel-default" style="float: left; <%= (agenda and agenda.name and 'border-color: blue;') or '' %>">
 			<div class="panel-heading">
 	    		<h4>Dados da agenda</h4>
 	  		</div>

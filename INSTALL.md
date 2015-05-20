@@ -48,11 +48,12 @@
   ```
   sudo apt-get install git
   ```
-* instalar Sailor
+* instalar Sailor e luasec
  
   ```
+  sudo luarocks install luasec OPENSSL_LIBDIR=/usr/lib/x86_64-linux-gnu/
   sudo luarocks install cgilua 5.1.4-2
-  sudo luarocks install sailor
+  sudo luarocks install sailor 0.2.1-1
   ```
 * instalar postgresql(9.3)--
 
@@ -99,6 +100,33 @@
     em <Directory /var/www/> substitua
     AllowOverride None por AllowOverride all
     ```
+* configurar aplicação - edite o arquivo /var/www/html/TBportal/conf/conf.lua e coloque os valores corretos para:
+	```
+	sailor = {
+		app_name = 'Céu na Terra',
+		portalAddr = 'ceunaterra.voip.ufrj.br'
+	},
+	db = {
+		user = "postgres",
+		pass = "postgres",
+		dbname = 'portal2'
+	},
+	smtp = {
+		server = 'smtp.gmail.com',
+		port = 465,
+		user = 'ceunaterra.testbed@gmail.com',
+		pass = 'projetotestbed',
+		from = 'ceunaterra.testbed@gmail.com'
+	}
+	```
+        Sendo:
+		* sailor.app_name - Nome da aplicação do Portal.
+		* sailor.portalAddr - Endereço do portal.
+		* db.* - dados do banco de dados criado no item "criar o banco de dados".
+		* smtp.* . dados do servidor e-mail utilizado para enviar os e-mails.
+	
+	Obs: Se for usar outra conta do gmail, é necessário ativar "Acesso para aplicativos menos seguros" para o envio de e-mail funcionar com Lua. (https://www.google.com/settings/u/1/security/lesssecureapps)
+
 * dar permissão de escrita para o Apache escrever arquivo de sessão 
  
     `sudo chown www-data:www-data /var/www/html/TBportal/runtime/tmp` 

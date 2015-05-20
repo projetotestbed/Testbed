@@ -24,6 +24,12 @@
 				    	<tr><td style="padding-left: 20px;"><input type="password" required="true" size='15' name="password1" id="password1" placeholder="Digite a senha"</td></tr>
 				    	<tr><td>Confirmar Senha:</td></tr>
 				    	<tr><td style="padding-left: 20px;"><input type="password" required="true" size='15' name="password2" id="password2" placeholder="Confirme a senha"</td></tr>
+						<tr><td style="padding-left: 20px; padding-top: 10px;">
+							<input type="button" class="btn btn-default" name='newPass' id='btnNewPass' value="Gerar Senha" onclick="newRandomPass()"/> 
+						</td></tr>
+						<tr><td style="padding-left: 20px; padding-top: 10px;">
+							<input type="checkbox" name="enviarEmail" value="email" checked > Enviar e-mail?
+						</td></tr>
 					</table>
 				 </div>
 				 <div class="col" style="float: left; padding-left: 25px;">
@@ -160,6 +166,16 @@ function disableBoxes(valid) {
 			checkboxes[i].disabled = valid;
 			checkboxes[i].checked = false;
 	}
+}
+
+
+function newRandomPass(){
+	var keys="abcdefghijklmnopqrstuvwxyz123456789"
+	var pass=''
+	for (i=0;i<6;i++)
+		pass+=keys.charAt(Math.floor(Math.random()*keys.length))
+	$('#password1').val(pass);
+	$('#password2').val(pass);
 }
 </script>
 

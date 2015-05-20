@@ -2,13 +2,14 @@
   local luasql = require "luasql.postgres"
   local md5 = require "md5"
   local socket = require("socket")
+
+  local config = require "conf.conf"
   
 function connect() 
   -- create environment object
   local env = assert (luasql.postgres())
-  -- connect to data source
-    --TODO: ler de sailor.config
-  local con = assert (env:connect("portal2","postgres","postgres","localhost"))
+  -- connect to data source  
+  local con = assert (env:connect(config.db.dbname,config.db.user,config.db.pass,config.db.host))
     con:setautocommit(false)
     return env,con
 end
@@ -741,11 +742,12 @@ end
 
 
 
-function get_log(con,session,testid)
+function get_log(con,session,testid, limit)
   local logTab = {}
   local cur1 = assert (con:execute(string.format("select startslot, endslot, testid, test.cname from test, agenda where test.uid = %d and test.testid=%d and test.idagenda = agenda.idagenda;",session.uid,testid)))
   local row1 = cur1:fetch ({}, "a")
   local testname=''
+  local totalLines = 0
   local log={}
   if row1 then
     log.starttime = slot2str(row1.startslot)
@@ -754,15 +756,21 @@ function get_log(con,session,testid)
     log.testname = row1.cname or ''
     local minutos = (slot2time(row1.endslot) - slot2time(row1.startslot))/60
     log.duration = math.floor(minutos/60/24) .. 'd '.. math.floor(minutos/60)%24 .. 'h '.. minutos%60 .. 'min';
-    local cur2 = assert (con:execute(string.format("SELECT logseq,testid,to_char(logtime,'YYYY/MM/DD HH24:MI:SS') as logtime,nodeid,logtype,logline, pid from logdata WHERE netid=%d and logtime>=to_timestamp('%s','DD/MM/YYYY HH24hMI') and (logtype = 'TEST' or logtype = 'DATA') order by logseq asc",session.netid,log.starttime)))
+    -- Query 'limit lines
+    local cur2 = assert (con:execute(string.format("SELECT logseq,testid,to_char(logtime,'YYYY/MM/DD HH24:MI:SS') as logtime,nodeid,logtype,logline, pid from logdata WHERE netid=%d and logtime>=to_timestamp('%s','DD/MM/YYYY HH24hMI') and (logtype = 'TEST' or logtype = 'DATA') order by logseq asc %s",session.netid,log.starttime,(limit and "LIMIT "..limit) or "")))
     local row2 = cur2:fetch ({}, "a")
     while row2 do
       table.insert(logTab,row2)
         row2 = cur2:fetch ({}, "a")
     end
     cur2:close()
+    -- find total lines
+    local cur3 = assert (con:execute(string.format("SELECT COUNT(*) FROM (SELECT logseq from logdata WHERE netid=%d and logtime>=to_timestamp('%s','DD/MM/YYYY HH24hMI') and (logtype = 'TEST' or logtype = 'DATA') order by logseq asc) as tb;",session.netid,log.starttime)))
+    local row3 = cur3:fetch ({}, "a")
+    totalLines =  (row3 and tonumber(row3.count)) or 0
+
   end
-  return log, logTab 
+  return log, logTab ,totalLines
 end
 
 function get_logdelta(con,session,last_logseq,cmd)
@@ -1146,3 +1154,63 @@ function getD_test_by_agenda(con,session,idagenda)
   cur:close()
   return test
 end
+
+
+function insert_syslog(con,session,text)
+  local stat, err = con:execute(string.format("INSERT INTO logdata (testid,netid,netversion,logtime,nodeid,logtype,logline,pid) VALUES (0,0,0,CURRENT_TIMESTAMP,0,'SYS',%s,0)",text))
+  if stat then con:commit() else con:rollback() end
+  return stat, err
+end
+
+-- -----------------------------------------------------------
+--     SMTP function 
+-- -----------------------------------------------------------
+-- Michal Kottman, 2011, public domain
+local smtp = require 'socket.smtp'
+local ssl = require 'ssl'
+local https = require 'ssl.https'
+local ltn12 = require 'ltn12'
+
+function sslCreate()
+    local sock = socket.tcp()
+    return setmetatable({
+        connect = function(_, host, port)
+            local r, e = sock:connect(host, port)
+            if not r then return r, e end
+            sock = ssl.wrap(sock, {mode='client', protocol='tlsv1'})
+            return sock:dohandshake()
+        end
+    }, {
+        __index = function(t,n)
+            return function(_, ...)
+                return sock[n](sock, ...)
+            end
+        end
+    })
+end
+
+function sendEmail(from, to, subject, body)
+    local msg = {
+        headers = {
+            to = '<'.. to ..'>',
+            subject = subject
+        },
+        body = body
+    }
+
+    local ok, err = smtp.send {
+        from = '<'.. from ..'>',
+        rcpt = '<'.. to ..'>',
+        source = smtp.message(msg),
+        user = config.smtp.user,
+        password = config.smtp.pass,
+        server = config.smtp.server,
+        port = config.smtp.port,
+        create = sslCreate
+    }
+    return ok, err
+end
+-- ---------------------------------------------------- smtp function
+
+
+

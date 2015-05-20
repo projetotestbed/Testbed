@@ -71,7 +71,7 @@ var maxNodes = <%= #motes%>;
 		<div class="col" style="float: left; padding-top: 3px; padding-right: 10px;">
 			<table>
 				<tr><td>
-				<div class="panel panel-default" style="float: left;">
+				<div class="panel panel-default" style="float: left; <%= (netconfig and netconfig.netconfigid and 'border-color: blue;') or '' %>">
 					<div class="panel-heading">
 			    		<h4><%= (netconfig and netconfig.netconfigid and 'Atualizar Configuração da Rede') or 'Nova Configuração da Rede' %></h4>
 						<%= (netconfig and netconfig.netconfigid and '(obs.: As alterações sobre-escrevem a configuração original.)') or '' %>
