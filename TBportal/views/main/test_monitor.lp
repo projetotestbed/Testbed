@@ -43,7 +43,6 @@
 window.onload = function() {
 	$('#dataArea').css('height', (window.innerHeight-200)+'px');
 	getServerTime();
-	getTestLog();
 };
 window.onresize = function() {
 	$('#dataArea').css('height', (window.innerHeight-200)+'px');
@@ -52,26 +51,29 @@ window.onresize = function() {
 	var servClockDelta = 0;
 	var getTestLogPeriod=1000;
 	var testid = 0
+	var offset = 0
+	var current_logseq=0
 
 	function getTestLog(){
 		//document.getElementById('waitChar').style.visibility="visible";
-		var last_logseq=$('#logTable tr:first td:eq(0)').text();
+		var last_logseq=current_logseq;
+		if (offset == 0) {last_logseq = $('#logTable tr:last td:eq(0)').text();}
+		current_logseq = last_logseq;
 		if (!last_logseq) {last_logseq="0";}
 		$.post("?r=main/getTestLog",
-			{last_logseq: last_logseq, cmd: 'TEST'},
+			{last_logseq: last_logseq, cmd: 'TEST', offset: offset},
 			function(data, status){appendData(data,status)}
 			);		
 	}
 
 	function appendData(data,status){
 		//document.getElementById('waitChar').style.visibility="hidden";
-		// get testid, line count, and test name from 1st line of data: "<!-- xx yy *** name -->"
+		// get testid, line count, offset, and test name from 1st line of data: "<!-- xx yy zz *** name -->"
 		if (data.length > 5) {
-			setTimeout(getTestLog, 1000);
 			var params = (data.substring(4, data.indexOf("***"))).trim(); 
 			var testname = (data.substring(data.indexOf("***")+3, data.indexOf("-->"))).trim(); 
 			//$('#testid').val(params);
-			var values = params.split(" "); // [0]=testid, [1]=lines
+			var values = params.split(" "); // [0]=testid, [1]=lines, [2]=offset
 			if (Number(values[0]) == 0) {
 				$('#testid').css('color', 'red');
 				$('#testid').val("nenhum teste.");
@@ -85,7 +87,16 @@ window.onresize = function() {
 					$('#btnStart').removeAttr("disabled");
 					}
 			}
-			$('#logTable').prepend(data);
+			if (Number(values[1])>0) {
+				$('#logTable').append(data);
+				$('#dataArea').scrollTop($('#dataArea')[0].scrollHeight);
+			}
+			offset = Number(values[2]);
+ 			if (offset > 0) {
+				getTestLog();
+			} else {
+				setTimeout(getTestLog, 1000);
+			}
 		} else {
 			// Exit from current page to main index (login)
 		    window.open ('?r=main','_self',false);
@@ -99,6 +110,8 @@ window.onresize = function() {
 		servClockDelta = clientDate.getTime() - serverDate.getTime();
 		servClock();
 		setInterval(servClock, 1000);
+		// now can get log data
+		getTestLog();
 	}
 
 	function getServerTime(){

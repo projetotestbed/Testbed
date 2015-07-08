@@ -34,7 +34,6 @@
 window.onload = function() {
 	$('#dataArea').css('height', (window.innerHeight-200)+'px');
 	getServerTime();
-	getTestLog();
 };
 window.onresize = function() {
 	$('#dataArea').css('height', (window.innerHeight-200)+'px');
@@ -43,24 +42,37 @@ window.onresize = function() {
 	var servClockDelta = 0;
 	var getTestLogPeriod=1000;
 	var testid = 0
+	var offset = 0
+	var current_logseq=0
 
 	function getTestLog(){
 		//document.getElementById('waitChar').style.visibility="visible";
-		var last_logseq=$('#logTable tr:first td:eq(0)').text();
+		var last_logseq=current_logseq;
+		if (offset == 0) {last_logseq = $('#logTable tr:last td:eq(0)').text();}
+		current_logseq = last_logseq;
 		if (!last_logseq) {last_logseq="0";}
 		$.post("?r=main/getTestLog",
-			{last_logseq: last_logseq, cmd: 'SYS'},
+			{last_logseq: last_logseq, cmd: 'SYS', offset: offset},
 			function(data, status){appendData(data,status)}
 			);		
 	}
 
 	function appendData(data,status){
-		// get line count from 1st line of data: "<!-- xx -->"
 		//document.getElementById('waitChar').style.visibility="hidden";
+		// get line count, and offset from 1st line of data: "<!-- xx yy -->"
 		if (data.length > 5) {
-			setTimeout(getTestLog, 1000);
-			var linesStr = (data.substring(4, data.indexOf("-->"))).trim(); 
-			$('#logTable').prepend(data);
+			var params = (data.substring(4, data.indexOf("-->"))).trim(); 
+			var values = params.split(" "); // [0]=lines, [1]=offset
+			if (Number(values[0])>0) {
+				$('#logTable').append(data);
+				$('#dataArea').scrollTop($('#dataArea')[0].scrollHeight);
+			}
+			offset = Number(values[1]);
+ 			if (offset > 0) {
+				getTestLog();
+			} else {
+				setTimeout(getTestLog, 1000);
+			}
 		} else {
 			// Exit from current page to main index (login)
 		    window.open ('?r=main','_self',false);
@@ -74,6 +86,8 @@ window.onresize = function() {
 		servClockDelta = clientDate.getTime() - serverDate.getTime();
 		servClock();
 		setInterval(servClock, 1000);
+		// now can get log data
+		getTestLog();
 	}
 
 	function getServerTime(){

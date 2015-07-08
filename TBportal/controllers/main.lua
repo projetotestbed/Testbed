@@ -334,10 +334,12 @@ end
 -- Ajax call
 function main.getTestLog(page)
   if not checkSession(page,true) then  page:write(""); return end
-  env,con = connect()
+  local env,con = connect()
   local testid=0
   local testname=''
   local lines=0
+  local offset=0
+  local logTable,logdata
 
   if next(page.POST) then
     local par = page.POST
@@ -345,12 +347,19 @@ function main.getTestLog(page)
     local wdt2='150px'
     local wdt3='30px'
     local wdt4='60px'
-    local testid, testname, logTable = get_logdelta(con,session,par.last_logseq,par.cmd)
+    if par.testid then
+        testid=par.testid
+        logdata, logTable, offset = get_log(con,session,testid,500,par.offset)
+        close_connect(env,con)
+    else
+      testid, testname, logTable, offset = get_logdelta(con,session,par.last_logseq,par.cmd,500,par.offset)
+      close_connect(env,con)
+    end
     lines = #logTable
     if (par.cmd == 'TEST') then
-      page:write("<!-- "..testid .. ' '.. lines .. ' *** '.. testname ..'-->')
+      page:write("<!-- "..testid .. ' '.. lines .. ' '.. offset .. ' *** '.. testname ..'-->')
     else
-      page:write("<!-- ".. lines ..'-->')
+      page:write("<!-- ".. lines .. ' '.. offset.. ' -->')
     end
     for k,reg in pairs(logTable) do 
       local logtype=reg.logtype
@@ -366,9 +375,9 @@ function main.getTestLog(page)
       page:write('</tr>')
     end
   else
-    page:write("<!-- "..testid .. ' '.. lines .. ' *** '.. testname ..'-->')
-  end
     close_connect(env,con)
+    page:write("<!-- "..testid .. ' '.. lines .. ' '.. offset .. ' *** '.. testname ..'-->')
+  end
 end
 
 function main.test_monitor(page) 
@@ -386,20 +395,27 @@ function main.viewlog(page)
   local logdata={}
   local logTable={}
   local totalLines=0
+  local offset=0;
   if next(page.POST) and page.POST.testid then
-    logdata, logTable = get_log(con,session,page.POST.testid)
-    close_connect(env,con)
-    logdata.data = ""
-    for k,reg in pairs(logTable) do 
-      line = reg.logseq .. ', ' .. reg.logtime .. ', ' .. reg.nodeid .. ', ' .. reg.logtype .. ', ' .. reg.logline .. '\n'
-      logdata.data= logdata.data .. line
-    end    
+    -- Open temp file
     local serverfile = os.tmpname()
-    local filename = "tblog_"..session.netid .."_" .. logdata.testid   ..".log"
+    local filename = "tblog_"..session.netid .."_" .. page.POST.testid   ..".log"
     file, err = io.open (serverfile , 'w')
     io.output(file)
-    io.write(logdata.data)
+
+    -- fetch log data from DB  
+    while true do  
+        logdata, logTable, offset = get_log(con,session,page.POST.testid,1000,offset)
+        logdata.data = ""
+        for k,reg in pairs(logTable) do 
+          line = reg.logseq .. ', ' .. reg.logtime .. ', ' .. reg.nodeid .. ', ' .. reg.logtype .. ', ' .. reg.logline .. '\n'
+          logdata.data= logdata.data .. line
+        end
+        io.write(logdata.data)
+        if offset == 0 then break end
+    end
     io.close(file)          
+    close_connect(env,con)
     page.r.content_type="application/text"
     page.r.headers_out["Content-Disposition"]="attachment; filename="..filename
     page.r:sendfile(serverfile)
@@ -407,26 +423,7 @@ function main.viewlog(page)
     return
   else
     if next(page.GET) and page.GET.testid then
-      local wdt1='50px'
-      local wdt2='150px'
-      local wdt3='30px'
-      local wdt4='60px'
-      logdata, logTable, totalLines= get_log(con,session,page.GET.testid,3000)
-      if totalLines > 3000 then logdata.alert = "Arquivo muito grande. Recuperando somente 3000 linhas. Faça download para recuperar o total de ".. totalLines .." linhas." end
-      logdata.data = ""
-      for k,reg in pairs(logTable) do 
-        local logtype=reg.logtype
-        if string.find(reg.logline,"ERROR:") then
-          logtype = '<font color="red">'..reg.logtype .. '</font>'
-        end
-        logdata.data= logdata.data .. '<tr>'
-        logdata.data= logdata.data .. '<td hidden >'.. reg.logseq ..'</td>'
-        logdata.data= logdata.data .. '<td style="min-width:'..wdt2 ..';">'.. reg.logtime ..'</td>'
-        logdata.data= logdata.data .. '<td style="min-width:'..wdt3 ..';" '.. 'align="center">'.. reg.nodeid ..'</td>'
-        logdata.data= logdata.data .. '<td style="min-width:'..wdt4 ..';">'..logtype ..'</td>'
-        logdata.data= logdata.data .. '<td >'.. reg.logline ..'</td>'
-        logdata.data= logdata.data .. '</tr>'
-      end
+      logdata, logTable, offset= get_log(con,session,page.GET.testid,1,0)
       close_connect(env,con)
       page:render('viewlog',{session=session,log=logdata})
       return

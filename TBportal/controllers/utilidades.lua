@@ -742,12 +742,15 @@ end
 
 
 
-function get_log(con,session,testid, limit)
+function get_log(con,session,testid, limit, offset)
+  limit = limit or 'ALL'
+  offset = offset or 0
   local logTab = {}
   local cur1 = assert (con:execute(string.format("select startslot, endslot, testid, test.cname from test, agenda where test.uid = %d and test.testid=%d and test.idagenda = agenda.idagenda;",session.uid,testid)))
   local row1 = cur1:fetch ({}, "a")
   local testname=''
   local totalLines = 0
+  local newOffset = 0
   local log={}
   if row1 then
     log.starttime = slot2str(row1.startslot)
@@ -757,7 +760,7 @@ function get_log(con,session,testid, limit)
     local minutos = (slot2time(row1.endslot) - slot2time(row1.startslot))/60
     log.duration = math.floor(minutos/60/24) .. 'd '.. math.floor(minutos/60)%24 .. 'h '.. minutos%60 .. 'min';
     -- Query 'limit lines
-    local cur2 = assert (con:execute(string.format("SELECT logseq,testid,to_char(logtime,'YYYY/MM/DD HH24:MI:SS') as logtime,nodeid,logtype,logline, pid from logdata WHERE netid=%d and logtime>=to_timestamp('%s','DD/MM/YYYY HH24hMI') and (logtype = 'TEST' or logtype = 'DATA') order by logseq asc %s",session.netid,log.starttime,(limit and "LIMIT "..limit) or "")))
+    local cur2 = assert (con:execute(string.format("SELECT logseq,testid,to_char(logtime,'YYYY/MM/DD HH24:MI:SS') as logtime,nodeid,logtype,logline, pid from logdata WHERE netid=%d and logtime>=to_timestamp('%s','DD/MM/YYYY HH24hMI') and (logtype = 'TEST' or logtype = 'DATA') order by logseq asc %s",session.netid,log.starttime," LIMIT "..limit .. " OFFSET "..offset)))
     local row2 = cur2:fetch ({}, "a")
     while row2 do
       table.insert(logTab,row2)
@@ -768,14 +771,19 @@ function get_log(con,session,testid, limit)
     local cur3 = assert (con:execute(string.format("SELECT COUNT(*) FROM (SELECT logseq from logdata WHERE netid=%d and logtime>=to_timestamp('%s','DD/MM/YYYY HH24hMI') and (logtype = 'TEST' or logtype = 'DATA') order by logseq asc) as tb;",session.netid,log.starttime)))
     local row3 = cur3:fetch ({}, "a")
     totalLines =  (row3 and tonumber(row3.count)) or 0
+    log.total = totalLines
+    newOffset = (((totalLines - offset) > limit) and (offset + limit)) or 0
 
   end
-  return log, logTab ,totalLines
+  return log, logTab ,newOffset
 end
 
-function get_logdelta(con,session,last_logseq,cmd)
+function get_logdelta(con,session,last_logseq,cmd, limit, offset)
+  limit = limit or 'ALL'
+  offset = offset or 0
   local logTab = {}
   local testid=0
+  local newOffset = 0
   local testname=''
   local starttime
   if (cmd=='TEST') then
@@ -785,24 +793,34 @@ function get_logdelta(con,session,last_logseq,cmd)
       starttime = slot2str(row1.startslot)
       testid = row1.testid or '0'
       testname = row1.cname or ''
-      local cur2 = assert (con:execute(string.format("SELECT logseq,testid,to_char(logtime,'YYYY/MM/DD HH24:MI:SS') as logtime,nodeid,logtype,logline, pid from logdata WHERE netid=%d and logtime>=to_timestamp('%s','DD/MM/YYYY HH24hMI') and logseq > %d and (logtype = 'TEST' or logtype = 'DATA') order by logseq desc",session.netid,starttime,last_logseq)))
+      local cur2 = assert (con:execute(string.format("SELECT logseq,testid,to_char(logtime,'YYYY/MM/DD HH24:MI:SS') as logtime,nodeid,logtype,logline, pid from logdata WHERE netid=%d and logtime>=to_timestamp('%s','DD/MM/YYYY HH24hMI') and logseq > %d and (logtype = 'TEST' or logtype = 'DATA') order by logseq asc %s",session.netid,starttime,last_logseq," LIMIT "..limit .. " OFFSET "..offset)))
       local row2 = cur2:fetch ({}, "a")
       while row2 do
         table.insert(logTab,row2)
           row2 = cur2:fetch ({}, "a")
       end
       cur2:close()
+      -- find total lines and new offset
+      local cur3 = assert (con:execute(string.format("SELECT count(*) from logdata WHERE netid=%d and logtime>=to_timestamp('%s','DD/MM/YYYY HH24hMI') and logseq > %d and (logtype = 'TEST' or logtype = 'DATA') ",session.netid,starttime,last_logseq)))
+      local row3 = cur3:fetch ({}, "a")
+      local totalLines =  (row3 and tonumber(row3.count)) or 0
+      newOffset = (((totalLines - offset) > limit) and (offset + limit)) or 0
     end
   else
-      local cur2 = assert (con:execute(string.format("SELECT logseq,testid,to_char(logtime,'YYYY/MM/DD HH24:MI:SS') as logtime,nodeid,logtype,logline, pid from logdata WHERE netid=%d and logtime>=(CURRENT_TIMESTAMP - interval '2 days') and logseq > %d and logtype != 'TEST' and logtype != 'DATA' order by logseq desc",session.netid,last_logseq)))
+      local cur2 = assert (con:execute(string.format("SELECT logseq,testid,to_char(logtime,'YYYY/MM/DD HH24:MI:SS') as logtime,nodeid,logtype,logline, pid from logdata WHERE netid=%d and logtime>=(CURRENT_TIMESTAMP - interval '2 days') and logseq > %d and logtype != 'TEST' and logtype != 'DATA' order by logseq asc %s",session.netid,last_logseq," LIMIT "..limit .. " OFFSET "..offset)))
       local row2 = cur2:fetch ({}, "a")
       while row2 do
         table.insert(logTab,row2)
           row2 = cur2:fetch ({}, "a")
       end
       cur2:close()  
+      -- find total lines and new offset
+      local cur3 = assert (con:execute(string.format("SELECT count(*) from logdata WHERE netid=%d and logtime>=(CURRENT_TIMESTAMP - interval '2 days') and logseq > %d and logtype != 'TEST' and logtype != 'DATA' ",session.netid,last_logseq)))
+      local row3 = cur3:fetch ({}, "a")
+      local totalLines =  (row3 and tonumber(row3.count)) or 0
+      newOffset = (((totalLines - offset) > limit) and (offset + limit)) or 0
   end
-  return testid,testname, logTab
+  return testid,testname, logTab, newOffset
 end
 
 -- get the latest 

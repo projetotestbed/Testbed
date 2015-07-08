@@ -65,7 +65,7 @@
 								<li><a href="?r=main/update_nodestype">Atualizar tipos de motes</a></li>
 								<li role="presentation" class="divider hidden-lg hidden-md"></li>
 								<li role="presentation" class="dropdown-header hidden-lg hidden-md">Consultas</li>
-								<li class="hidden-lg hidden-md"><a href="#">xxxx</a></li>
+								<li class="hidden-lg hidden-md"><a href="?r=main/sys_monitor">System Monitor</a></li>
 								<li role="presentation" class="divider hidden-lg hidden-md"></li>
 								<li role="presentation" class="dropdown-header hidden-lg hidden-md">Ajuda</li>
 								<li class="hidden-lg hidden-md"><a href="?r=main/admmanual">Manual de Administração</a></li>
@@ -79,7 +79,7 @@
 							</a>
 							<ul class="dropdown-menu">
 								<li role="presentation" class="dropdown-header hidden-lg">Consultas</li>
-								<li><a href="#">xxxx</a></li>
+								<li><a href="?r=main/sys_monitor">System Monitor</a></li>
 								<li role="presentation" class="divider hidden-lg"></li>
 								<li role="presentation" class="dropdown-header hidden-lg">Ajuda</li>
 								<li class="hidden-lg"><a href="?r=main/admmanual">Manual de Administração</a></li>
